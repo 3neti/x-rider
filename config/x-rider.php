@@ -22,7 +22,7 @@ return [
     'redirects' => [
         'allowed_schemes' => ['http', 'https'],
         'allowed_hosts' => [],
-        'allow_any_host' => env('X_RIDER_ALLOW_ANY_REDIRECT_HOST', true),
+        'allow_any_host' => env('X_RIDER_ALLOW_ANY_REDIRECT_HOST', false),
         'fallback_url' => env('X_RIDER_FALLBACK_URL', '/'),
     ],
 
@@ -37,8 +37,12 @@ return [
         'logger' => 'stack',
     ],
 
-    'drivers' => [
-        // Future driver runtime registry. Example:
-        // 'markdown' => \Vendor\Package\Rider\MarkdownDriver::class,
-    ],
+    'driver' => env('X_RIDER_DRIVER', 'default'),
+
+    'drivers_path' => env(
+        'X_RIDER_DRIVERS_PATH',
+        config_path('x-rider-drivers')
+    ),
+
+    'package_drivers_path' => __DIR__.'/../resources/rider-drivers',
 ];

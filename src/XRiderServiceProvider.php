@@ -35,6 +35,15 @@ class XRiderServiceProvider extends ServiceProvider
         ], 'x-rider-config');
 
         $this->publishes([
+            __DIR__.'/../resources/rider-drivers' => config_path('x-rider-drivers'),
+        ], 'x-rider-drivers');
+
+        $this->publishes([
+            __DIR__.'/../config/x-rider.php' => config_path('x-rider.php'),
+            __DIR__.'/../resources/rider-drivers' => config_path('x-rider-drivers'),
+        ], 'x-rider');
+
+        $this->publishes([
             __DIR__.'/../resources/js/pages/x-rider' => resource_path('js/pages/x-rider'),
             __DIR__.'/../resources/js/components/x-rider' => resource_path('js/components/x-rider'),
             __DIR__.'/../resources/js/composables' => resource_path('js/composables'),

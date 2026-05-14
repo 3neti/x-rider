@@ -1,0 +1,23 @@
+name: default
+version: 1.0.0
+
+rider:
+  success:
+    enabled: true
+    type: markdown
+    content: |
+      Thank you. Your claim has been received.
+
+  pending:
+    enabled: true
+    type: markdown
+    content: |
+      Your claim has been received and is being processed.
+
+  redirect:
+    enabled: false
+    timeout: 5
+    fallback_url: /x/claim
+
+  analytics:
+    enabled: true
