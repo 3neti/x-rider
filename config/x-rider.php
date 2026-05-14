@@ -1,41 +1,6 @@
 <?php
 
-use LBHurtado\XRider\Enums\RiderContentType;
-use LBHurtado\XRider\Enums\RiderOutcomeState;
-
 return [
-    'routes' => [
-        'enabled' => true,
-        'prefix' => 'x-rider',
-        'middleware' => ['web'],
-    ],
-
-    'defaults' => [
-        'outcome_state' => RiderOutcomeState::AcceptedSuccess->value,
-        'success_type' => RiderContentType::Markdown->value,
-        'success_message' => 'Your claim has been received.',
-        'pending_message' => 'Your claim has been received. Your disbursement is currently being processed.',
-        'redirect_timeout' => 5,
-        'fallback_url' => '/',
-    ],
-
-    'redirects' => [
-        'allowed_schemes' => ['http', 'https'],
-        'allowed_hosts' => [],
-        'allow_any_host' => env('X_RIDER_ALLOW_ANY_REDIRECT_HOST', false),
-        'fallback_url' => env('X_RIDER_FALLBACK_URL', '/'),
-    ],
-
-    'rendering' => [
-        'markdown_enabled' => true,
-        'html_enabled' => false,
-        'iframe_enabled' => false,
-    ],
-
-    'analytics' => [
-        'enabled' => true,
-        'logger' => 'stack',
-    ],
 
     'driver' => env('X_RIDER_DRIVER', 'default'),
 
@@ -45,4 +10,36 @@ return [
     ),
 
     'package_drivers_path' => __DIR__.'/../resources/rider-drivers',
+
+    'defaults' => [
+        'outcome_state' => env('X_RIDER_DEFAULT_OUTCOME_STATE', 'accepted_success'),
+
+        'success_message' => 'Thank you. Your claim has been received.',
+        'pending_message' => 'Your claim has been received and is being processed.',
+
+        'success_type' => 'markdown',
+        'redirect_timeout' => 5,
+    ],
+
+    'redirects' => [
+        'fallback_url' => env('X_RIDER_FALLBACK_URL', '/'),
+
+        'allowed_schemes' => [
+            'http',
+            'https',
+        ],
+
+        'allowed_hosts' => [
+            // 'merchant.example.com',
+        ],
+
+        'allow_any_host' => env('X_RIDER_ALLOW_ANY_REDIRECT_HOST', false),
+    ],
+
+    'routes' => [
+        'enabled' => env('X_RIDER_ROUTES_ENABLED', true),
+        'prefix' => env('X_RIDER_ROUTE_PREFIX', 'x-rider'),
+        'middleware' => ['web'],
+    ],
+
 ];

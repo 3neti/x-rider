@@ -9,45 +9,60 @@ class DefaultSuccessRedirectResolver implements SuccessRedirectResolverContract
 {
     public function resolve(RiderExperienceData $experience): string
     {
-        $fallback = $experience->redirect?->fallbackUrl
-            ?: config('x-rider.redirects.fallback_url', '/');
+        $redirect = $experience->redirect;
 
-        if (! $experience->riderMayRun() || ! $experience->redirect?->hasUrl()) {
+        $fallback = $redirect?->fallbackUrl ?: (string) config('x-rider.redirects.fallback_url', '/');
+
+        if (! $redirect?->hasUrl()) {
             return $fallback;
         }
 
-        $url = (string) $experience->redirect->url;
+        $url = $redirect->url;
 
-        return $this->isAllowed($url) ? $url : $fallback;
+        if (! $this->hasAllowedScheme($url)) {
+            return $fallback;
+        }
+
+        if (! $this->hasAllowedHost($url)) {
+            return $fallback;
+        }
+
+        return $url;
     }
 
-    protected function isAllowed(string $url): bool
+    protected function hasAllowedScheme(string $url): bool
     {
-        $parts = parse_url($url);
+        $scheme = parse_url($url, PHP_URL_SCHEME);
 
-        if (! is_array($parts) || blank($parts['scheme'] ?? null)) {
+        if (! is_string($scheme) || $scheme === '') {
             return false;
         }
 
-        $scheme = strtolower((string) $parts['scheme']);
-        $allowedSchemes = array_map('strtolower', config('x-rider.redirects.allowed_schemes', ['http', 'https']));
+        return in_array(
+            strtolower($scheme),
+            array_map('strtolower', (array) config('x-rider.redirects.allowed_schemes', ['http', 'https'])),
+            true
+        );
+    }
 
-        if (! in_array($scheme, $allowedSchemes, true)) {
-            return false;
-        }
-
-        $host = strtolower((string) ($parts['host'] ?? ''));
-
-        if (blank($host)) {
-            return false;
-        }
-
-        if ((bool) config('x-rider.redirects.allow_any_host', true)) {
+    protected function hasAllowedHost(string $url): bool
+    {
+        if ((bool) config('x-rider.redirects.allow_any_host', false)) {
             return true;
         }
 
-        $allowedHosts = array_map('strtolower', config('x-rider.redirects.allowed_hosts', []));
+        $allowedHosts = array_filter((array) config('x-rider.redirects.allowed_hosts', []));
 
-        return in_array($host, $allowedHosts, true);
+        if ($allowedHosts === []) {
+            return false;
+        }
+
+        $host = parse_url($url, PHP_URL_HOST);
+
+        if (! is_string($host) || $host === '') {
+            return false;
+        }
+
+        return in_array(strtolower($host), array_map('strtolower', $allowedHosts), true);
     }
 }

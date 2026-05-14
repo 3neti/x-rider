@@ -10,31 +10,57 @@ use LBHurtado\XRider\Data\RiderRedirectData;
 use LBHurtado\XRider\Data\RiderSubjectData;
 use LBHurtado\XRider\Enums\RiderContentType;
 use LBHurtado\XRider\Enums\RiderOutcomeState;
+use LBHurtado\XRider\Support\RiderDriverLoader;
 
 class DefaultRiderExperienceResolver implements RiderExperienceResolverContract
 {
     public function __construct(
         protected RiderCampaignResolverContract $campaigns,
+        protected RiderDriverLoader $drivers,
     ) {}
 
     public function resolve(RiderSubjectData $subject, array $context = []): RiderExperienceData
     {
-        $state = RiderOutcomeState::tryFrom((string) data_get($context, 'state', config('x-rider.defaults.outcome_state')))
-            ?? RiderOutcomeState::AcceptedSuccess;
+        $state = RiderOutcomeState::tryFrom(
+            (string) data_get($context, 'state', config('x-rider.defaults.outcome_state'))
+        ) ?? RiderOutcomeState::AcceptedSuccess;
 
-        $rider = data_get($context, 'rider', []);
+        $driver = $this->drivers->load(
+            data_get($context, 'driver')
+        );
+
+        $driverRider = data_get($driver, 'rider', []);
+        $contextRider = data_get($context, 'rider', []);
+
+        // Published/default YAML provides the base experience.
+        // Runtime context wins for voucher-specific rider overrides.
+        $rider = array_replace_recursive(
+            is_array($driverRider) ? $driverRider : [],
+            is_array($contextRider) ? $contextRider : [],
+        );
+
         $message = data_get($rider, 'message')
-            ?? data_get($rider, 'success.content')
             ?? ($state === RiderOutcomeState::AcceptedPending
-                ? config('x-rider.defaults.pending_message')
-                : config('x-rider.defaults.success_message'));
+                ? data_get($rider, 'pending.content', config('x-rider.defaults.pending_message'))
+                : data_get($rider, 'success.content', config('x-rider.defaults.success_message')));
 
-        $successType = RiderContentType::tryFrom((string) (data_get($rider, 'type') ?? data_get($rider, 'success.type') ?? config('x-rider.defaults.success_type')))
-            ?? RiderContentType::Markdown;
+        $successType = RiderContentType::tryFrom((string) (
+            data_get($rider, 'type')
+            ?? data_get($rider, 'success.type')
+            ?? config('x-rider.defaults.success_type')
+        )) ?? RiderContentType::Markdown;
 
         $redirectUrl = data_get($rider, 'url') ?? data_get($rider, 'redirect.url');
-        $redirectTimeout = (int) (data_get($rider, 'redirect_timeout') ?? data_get($rider, 'redirect.timeout') ?? config('x-rider.defaults.redirect_timeout'));
-        $fallbackUrl = data_get($rider, 'fallback_url') ?? data_get($rider, 'redirect.fallback_url') ?? config('x-rider.redirects.fallback_url');
+
+        $redirectTimeout = (int) (
+            data_get($rider, 'redirect_timeout')
+            ?? data_get($rider, 'redirect.timeout')
+            ?? config('x-rider.defaults.redirect_timeout')
+        );
+
+        $fallbackUrl = data_get($rider, 'fallback_url')
+            ?? data_get($rider, 'redirect.fallback_url')
+            ?? config('x-rider.redirects.fallback_url');
 
         return new RiderExperienceData(
             state: $state,
@@ -47,7 +73,7 @@ class DefaultRiderExperienceResolver implements RiderExperienceResolverContract
                 meta: data_get($rider, 'success.meta', []),
             ),
             redirect: new RiderRedirectData(
-                enabled: $state->riderMayRun() && filled($redirectUrl),
+                enabled: $state->riderMayRun() && (bool) data_get($rider, 'redirect.enabled', filled($redirectUrl)),
                 url: $redirectUrl,
                 timeout: max(0, $redirectTimeout),
                 fallbackUrl: $fallbackUrl,
@@ -55,8 +81,17 @@ class DefaultRiderExperienceResolver implements RiderExperienceResolverContract
             ),
             campaign: $this->campaigns->resolve($subject, $context),
             ads: data_get($context, 'ads', data_get($rider, 'ads', [])),
-            analytics: data_get($context, 'analytics', []),
-            meta: data_get($context, 'meta', []),
+            analytics: array_replace_recursive(
+                (array) data_get($rider, 'analytics', []),
+                (array) data_get($context, 'analytics', []),
+            ),
+            meta: array_replace_recursive(
+                [
+                    'driver' => data_get($driver, 'name', config('x-rider.driver', 'default')),
+                    'driver_version' => data_get($driver, 'version'),
+                ],
+                (array) data_get($context, 'meta', []),
+            ),
         );
     }
 
@@ -68,7 +103,8 @@ class DefaultRiderExperienceResolver implements RiderExperienceResolverContract
 
         return new RiderContentData(
             enabled: (bool) data_get($value, 'enabled', true),
-            type: RiderContentType::tryFrom((string) data_get($value, 'type', RiderContentType::Markdown->value)) ?? RiderContentType::Markdown,
+            type: RiderContentType::tryFrom((string) data_get($value, 'type', RiderContentType::Markdown->value))
+            ?? RiderContentType::Markdown,
             content: data_get($value, 'content'),
             meta: data_get($value, 'meta', []),
         );

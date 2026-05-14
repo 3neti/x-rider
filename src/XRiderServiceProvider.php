@@ -14,12 +14,15 @@ use LBHurtado\XRider\Services\DefaultRiderExperienceResolver;
 use LBHurtado\XRider\Services\DefaultSuccessRedirectResolver;
 use LBHurtado\XRider\Services\LogRiderAnalyticsRecorder;
 use LBHurtado\XRider\Services\RiderRenderer;
+use LBHurtado\XRider\Support\RiderDriverLoader;
 
 class XRiderServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
         $this->mergeConfigFrom(__DIR__.'/../config/x-rider.php', 'x-rider');
+
+        $this->app->singleton(RiderDriverLoader::class);
 
         $this->app->singleton(RiderCampaignResolverContract::class, DefaultRiderCampaignResolver::class);
         $this->app->singleton(RiderExperienceResolverContract::class, DefaultRiderExperienceResolver::class);

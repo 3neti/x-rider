@@ -1,21 +1,83 @@
 <?php
 
+use Illuminate\Filesystem\Filesystem;
+use LBHurtado\XRider\Contracts\RiderCampaignResolverContract;
+use LBHurtado\XRider\Data\RiderCampaignData;
 use LBHurtado\XRider\Data\RiderSubjectData;
-use LBHurtado\XRider\Services\DefaultRiderCampaignResolver;
+use LBHurtado\XRider\Enums\RiderOutcomeState;
 use LBHurtado\XRider\Services\DefaultRiderExperienceResolver;
+use LBHurtado\XRider\Support\RiderDriverLoader;
 
-it('normalizes legacy message and url rider shape', function () {
-    $resolver = new DefaultRiderExperienceResolver(new DefaultRiderCampaignResolver());
+function xRiderTestSubject(): RiderSubjectData
+{
+    return new RiderSubjectData(
+        type: 'voucher',
+        id: 'ABC123',
+        code: 'ABC123',
+        meta: [],
+    );
+}
 
-    $experience = $resolver->resolve(new RiderSubjectData(reference: 'claim-ABC', code: 'ABC'), [
+function xRiderCampaignStub(): RiderCampaignResolverContract
+{
+    return new class implements RiderCampaignResolverContract {
+        public function resolve(RiderSubjectData $subject, array $context = []): RiderCampaignData
+        {
+            return new RiderCampaignData(
+                id: null,
+                merchant: null,
+                meta: [],
+            );
+        }
+    };
+}
+
+it('resolves the default rider experience from yaml', function () {
+    config()->set('x-rider.package_drivers_path', __DIR__.'/../../resources/rider-drivers');
+
+    $resolver = new DefaultRiderExperienceResolver(
+        campaigns: xRiderCampaignStub(),
+        drivers: new RiderDriverLoader(new Filesystem),
+    );
+
+    $experience = $resolver->resolve(xRiderTestSubject());
+
+    expect($experience->normalizedState())->toBe(RiderOutcomeState::AcceptedSuccess->value)
+        ->and($experience->success?->content)->toContain('Thank you')
+        ->and($experience->redirect?->timeout)->toBe(5)
+        ->and($experience->meta['driver'])->toBe('default');
+});
+
+it('uses pending content for accepted pending state', function () {
+    config()->set('x-rider.package_drivers_path', __DIR__.'/../../resources/rider-drivers');
+
+    $resolver = new DefaultRiderExperienceResolver(
+        campaigns: xRiderCampaignStub(),
+        drivers: new RiderDriverLoader(new Filesystem),
+    );
+
+    $experience = $resolver->resolve(xRiderTestSubject(), [
+        'state' => RiderOutcomeState::AcceptedPending->value,
+    ]);
+
+    expect($experience->success?->content)->toContain('being processed');
+});
+
+it('lets context rider override yaml rider content', function () {
+    config()->set('x-rider.package_drivers_path', __DIR__.'/../../resources/rider-drivers');
+
+    $resolver = new DefaultRiderExperienceResolver(
+        campaigns: xRiderCampaignStub(),
+        drivers: new RiderDriverLoader(new Filesystem),
+    );
+
+    $experience = $resolver->resolve(xRiderTestSubject(), [
         'rider' => [
-            'message' => 'Thank you for claiming.',
-            'url' => 'https://merchant.example/continue',
-            'redirect_timeout' => 7,
+            'success' => [
+                'content' => 'Context wins.',
+            ],
         ],
     ]);
 
-    expect($experience->success?->content)->toBe('Thank you for claiming.')
-        ->and($experience->redirect?->url)->toBe('https://merchant.example/continue')
-        ->and($experience->redirect?->timeout)->toBe(7);
+    expect($experience->success?->content)->toBe('Context wins.');
 });
