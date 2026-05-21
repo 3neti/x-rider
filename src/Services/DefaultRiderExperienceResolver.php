@@ -2,6 +2,7 @@
 
 namespace LBHurtado\XRider\Services;
 
+use Illuminate\Support\Facades\Log;
 use LBHurtado\XRider\Contracts\RiderCampaignResolverContract;
 use LBHurtado\XRider\Contracts\RiderExperienceResolverContract;
 use LBHurtado\XRider\Data\RiderContentData;
@@ -32,8 +33,6 @@ class DefaultRiderExperienceResolver implements RiderExperienceResolverContract
         $driverRider = data_get($driver, 'rider', []);
         $contextRider = data_get($context, 'rider', []);
 
-        // Published/default YAML provides the base experience.
-        // Runtime context wins for voucher-specific rider overrides.
         $rider = array_replace_recursive(
             is_array($driverRider) ? $driverRider : [],
             is_array($contextRider) ? $contextRider : [],
@@ -62,6 +61,31 @@ class DefaultRiderExperienceResolver implements RiderExperienceResolverContract
             ?? data_get($rider, 'redirect.fallback_url')
             ?? config('x-rider.redirects.fallback_url');
 
+        $redirectEnabled = $this->redirectEnabled(
+            state: $state,
+            rider: $rider,
+            contextRider: is_array($contextRider) ? $contextRider : [],
+            redirectUrl: $redirectUrl,
+        );
+
+        Log::debug('[x-rider] resolved rider experience', [
+            'subject_type' => $subject->type,
+            'subject_id' => $subject->id,
+            'subject_code' => $subject->code,
+            'state' => $state->value,
+            'message_present' => filled($message),
+            'message_preview' => is_string($message) ? str($message)->limit(80)->toString() : null,
+            'redirect_url_present' => filled($redirectUrl),
+            'redirect_url' => $redirectUrl,
+            'redirect_enabled' => $redirectEnabled,
+            'redirect_timeout' => max(0, $redirectTimeout),
+            'fallback_url' => $fallbackUrl,
+            'context_rider_keys' => is_array($contextRider) ? array_keys($contextRider) : [],
+            'merged_redirect_enabled' => data_get($rider, 'redirect.enabled'),
+            'context_redirect_enabled' => is_array($contextRider) ? data_get($contextRider, 'redirect.enabled') : null,
+            'context_redirect_enabled_legacy' => is_array($contextRider) ? data_get($contextRider, 'redirect_enabled') : null,
+        ]);
+
         return new RiderExperienceData(
             state: $state,
             subject: $subject,
@@ -73,7 +97,7 @@ class DefaultRiderExperienceResolver implements RiderExperienceResolverContract
                 meta: data_get($rider, 'success.meta', []),
             ),
             redirect: new RiderRedirectData(
-                enabled: $state->riderMayRun() && (bool) data_get($rider, 'redirect.enabled', filled($redirectUrl)),
+                enabled: $redirectEnabled,
                 url: $redirectUrl,
                 timeout: max(0, $redirectTimeout),
                 fallbackUrl: $fallbackUrl,
@@ -93,6 +117,58 @@ class DefaultRiderExperienceResolver implements RiderExperienceResolverContract
                 (array) data_get($context, 'meta', []),
             ),
         );
+    }
+
+    protected function redirectEnabled(
+        RiderOutcomeState $state,
+        array $rider,
+        array $contextRider,
+        mixed $redirectUrl,
+    ): bool {
+        $decision = [
+            'state' => $state->value,
+            'rider_may_run' => $state->riderMayRun(),
+            'redirect_url' => $redirectUrl,
+            'redirect_url_present' => filled($redirectUrl),
+            'context_url_present' => filled(data_get($contextRider, 'url')),
+            'context_nested_url_present' => filled(data_get($contextRider, 'redirect.url')),
+            'context_redirect_enabled' => data_get($contextRider, 'redirect.enabled'),
+            'context_redirect_enabled_legacy' => data_get($contextRider, 'redirect_enabled'),
+            'merged_redirect_enabled' => data_get($rider, 'redirect.enabled'),
+        ];
+
+        if (! $state->riderMayRun()) {
+            Log::debug('[x-rider] redirect disabled: rider may not run', $decision);
+
+            return false;
+        }
+
+        if (data_get($contextRider, 'redirect.enabled') === false) {
+            Log::debug('[x-rider] redirect disabled: context redirect.enabled=false', $decision);
+
+            return false;
+        }
+
+        if (data_get($contextRider, 'redirect_enabled') === false) {
+            Log::debug('[x-rider] redirect disabled: context redirect_enabled=false', $decision);
+
+            return false;
+        }
+
+        $enabled = (bool) data_get($contextRider, 'redirect.enabled', false)
+            || (bool) data_get($contextRider, 'redirect_enabled', false)
+            || filled(data_get($contextRider, 'url'))
+            || filled(data_get($contextRider, 'redirect.url'))
+            || (
+                (bool) data_get($rider, 'redirect.enabled', false)
+                && filled($redirectUrl)
+            );
+
+        Log::debug('[x-rider] redirect enabled decision', $decision + [
+                'enabled' => $enabled,
+            ]);
+
+        return $enabled;
     }
 
     protected function contentFromArray(mixed $value): ?RiderContentData

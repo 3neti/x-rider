@@ -1,55 +1,109 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import { Button } from '@/components/ui/button';
+import { ExternalLink } from 'lucide-vue-next';
 
-const props = withDefaults(defineProps<{
-    seconds?: number;
-    endpoint?: string | null;
-    enabled?: boolean;
-}>(), {
-    seconds: 5,
-    endpoint: null,
-    enabled: true,
-});
-
-const remaining = ref(Math.max(0, props.seconds));
-let timer: number | undefined;
-
-const canRedirect = computed(() => props.enabled && !!props.endpoint);
-
-function goNow() {
-    if (!canRedirect.value || !props.endpoint) return;
-    window.location.href = props.endpoint;
+interface RiderRedirect {
+  enabled: boolean;
+  url?: string | null;
+  timeout: number;
+  fallbackUrl?: string | null;
+  meta?: Record<string, unknown>;
 }
 
+interface Props {
+  redirect?: RiderRedirect | null;
+  redirectEndpoint?: string | null;
+  continueLabel?: string;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  continueLabel: 'Continue Now',
+});
+
+const countdown = ref(0);
+const isRedirecting = ref(false);
+
+let countdownInterval: ReturnType<typeof setInterval> | null = null;
+let redirectTimer: ReturnType<typeof setTimeout> | null = null;
+
+const hasRedirect = computed(() =>
+    Boolean(props.redirect?.enabled && props.redirectEndpoint)
+);
+
+const redirectTimeoutSeconds = computed(() => {
+  const timeout = props.redirect?.timeout ?? 10;
+
+  return Math.max(0, Number(timeout) || 0);
+});
+
+const handleRedirect = () => {
+  if (!hasRedirect.value || !props.redirectEndpoint) {
+    return;
+  }
+
+  isRedirecting.value = true;
+
+  window.location.href = props.redirectEndpoint;
+};
+
 onMounted(() => {
-    if (!canRedirect.value) return;
+  if (!hasRedirect.value) {
+    return;
+  }
 
-    timer = window.setInterval(() => {
-        remaining.value -= 1;
+  countdown.value = redirectTimeoutSeconds.value;
 
-        if (remaining.value <= 0) {
-            window.clearInterval(timer);
-            goNow();
-        }
-    }, 1000);
+  if (redirectTimeoutSeconds.value <= 0) {
+    handleRedirect();
+
+    return;
+  }
+
+  countdownInterval = setInterval(() => {
+    countdown.value = Math.max(0, countdown.value - 1);
+
+    if (countdown.value <= 0 && countdownInterval) {
+      clearInterval(countdownInterval);
+      countdownInterval = null;
+    }
+  }, 1000);
+
+  redirectTimer = setTimeout(() => {
+    handleRedirect();
+  }, redirectTimeoutSeconds.value * 1000);
 });
 
 onBeforeUnmount(() => {
-    if (timer) window.clearInterval(timer);
+  if (countdownInterval) {
+    clearInterval(countdownInterval);
+  }
+
+  if (redirectTimer) {
+    clearTimeout(redirectTimer);
+  }
 });
 </script>
 
 <template>
-    <div v-if="canRedirect" class="space-y-3 text-center">
-        <p class="text-sm text-muted-foreground">
-            Continuing in {{ remaining }} second<span v-if="remaining !== 1">s</span>.
-        </p>
-        <button
-            type="button"
-            class="inline-flex items-center justify-center rounded-lg border px-4 py-2 text-sm font-medium shadow-sm"
-            @click="goNow"
-        >
-            Continue now
-        </button>
-    </div>
+  <div v-if="hasRedirect && !isRedirecting" class="space-y-3">
+    <Button class="w-full rounded-full" @click="handleRedirect">
+      {{ continueLabel }}
+      <ExternalLink :size="14" class="ml-1.5" />
+    </Button>
+
+    <p
+        v-if="redirectTimeoutSeconds > 0"
+        class="text-center text-[11px] text-gray-400 dark:text-gray-600"
+    >
+      Redirecting in {{ countdown }}s
+    </p>
+  </div>
+
+  <p
+      v-else-if="hasRedirect && isRedirecting"
+      class="text-center text-sm text-muted-foreground"
+  >
+    Redirecting…
+  </p>
 </template>
