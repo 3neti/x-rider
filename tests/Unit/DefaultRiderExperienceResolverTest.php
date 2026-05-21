@@ -81,3 +81,24 @@ it('lets context rider override yaml rider content', function () {
 
     expect($experience->success?->content)->toBe('Context wins.');
 });
+
+it('enables redirect when legacy rider url is provided by context', function () {
+    config()->set('x-rider.package_drivers_path', __DIR__.'/../../resources/rider-drivers');
+
+    $resolver = new DefaultRiderExperienceResolver(
+        campaigns: xRiderCampaignStub(),
+        drivers: new RiderDriverLoader(new Filesystem),
+    );
+
+    $experience = $resolver->resolve(xRiderTestSubject(), [
+        'rider' => [
+            'message' => 'Thank you very much.',
+            'url' => 'https://merchant.example.com/thank-you',
+            'redirect_timeout' => 3,
+        ],
+    ]);
+
+    expect($experience->redirect?->enabled)->toBeTrue()
+        ->and($experience->redirect?->url)->toBe('https://merchant.example.com/thank-you')
+        ->and($experience->redirect?->timeout)->toBe(3);
+});

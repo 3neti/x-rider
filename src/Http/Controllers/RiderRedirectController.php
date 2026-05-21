@@ -21,11 +21,10 @@ class RiderRedirectController extends Controller
     public function __invoke(Request $request, string $reference)
     {
         $subject = new RiderSubjectData(
-            reference: $reference,
-            sourceType: $request->query('source_type'),
-            sourceId: $request->query('source_id'),
+            type: $request->query('source_type', 'reference'),
+            id: $request->query('source_id', $reference),
             code: $request->query('code'),
-            payload: $request->query(),
+            meta: $request->query(),
         );
 
         $experience = $this->experiences->resolve($subject, [
@@ -40,9 +39,9 @@ class RiderRedirectController extends Controller
 
         $this->analytics->record(new RiderAnalyticsEventData(
             event: 'rider.redirect.started',
-            reference: $reference,
-            sourceType: $subject->sourceType,
-            sourceId: $subject->sourceId,
+            reference: $subject->reference(),
+            sourceType: $subject->type,
+            sourceId: $subject->id,
             context: [
                 'state' => $experience->normalizedState(),
                 'target' => $target,
