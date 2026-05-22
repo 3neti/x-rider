@@ -51,6 +51,10 @@ class DefaultRiderExperienceResolver implements RiderExperienceResolverContract
             ->filter(fn ($stage) => $stage->normalizedType() === 'message')
             ->last(fn ($stage) => $stage->enabled);
 
+        $splashStage = collect($stageCollection->renderable())
+            ->filter(fn ($stage) => $stage->normalizedType() === 'splash')
+            ->last(fn ($stage) => $stage->enabled);
+
         $message = data_get($rider, 'message')
             ?? data_get($messageStage?->payload ?? [], 'content')
             ?? ($state === RiderOutcomeState::AcceptedPending
@@ -91,7 +95,10 @@ class DefaultRiderExperienceResolver implements RiderExperienceResolverContract
         return new RiderExperienceData(
             state: $state,
             subject: $subject,
-            preClaim: $this->contentFromArray(data_get($rider, 'pre_claim')),
+            preClaim: $this->preClaimContent(
+                rider: $rider,
+                splashStage: $splashStage,
+            ),
             success: new RiderContentData(
                 enabled: $state->riderMayRun() && filled($message),
                 type: $successType,
@@ -173,6 +180,40 @@ class DefaultRiderExperienceResolver implements RiderExperienceResolverContract
             ?? RiderContentType::Markdown,
             content: data_get($value, 'content'),
             meta: data_get($value, 'meta', []),
+        );
+    }
+
+    protected function preClaimContent(
+        array $rider,
+        ?\LBHurtado\XRider\Data\RiderStageData $splashStage = null,
+    ): ?RiderContentData {
+        $preClaim = $this->contentFromArray(data_get($rider, 'pre_claim'));
+
+        if ($preClaim instanceof RiderContentData) {
+            return $preClaim;
+        }
+
+        $content = data_get($splashStage?->payload ?? [], 'content');
+
+        if (! filled($content)) {
+            return null;
+        }
+
+        $type = RiderContentType::tryFrom((string) data_get(
+            $splashStage?->payload ?? [],
+            'content_type',
+            RiderContentType::Markdown->value
+        )) ?? RiderContentType::Markdown;
+
+        return new RiderContentData(
+            enabled: $splashStage?->enabled ?? true,
+            type: $type,
+            content: $content,
+            meta: array_filter([
+                'source' => 'stage',
+                'stage_key' => $splashStage?->key,
+                'timeout' => data_get($splashStage?->payload ?? [], 'timeout'),
+            ], fn ($value) => filled($value)),
         );
     }
 }

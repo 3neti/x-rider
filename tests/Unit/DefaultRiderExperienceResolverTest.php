@@ -246,3 +246,64 @@ it('keeps legacy rider message precedence over message stages', function () {
 
     expect($experience->success?->content)->toBe('Legacy message wins.');
 });
+
+it('normalizes explicit splash stage into rider pre claim content', function () {
+    config()->set('x-rider.package_drivers_path', __DIR__.'/../../resources/rider-drivers');
+
+    $resolver = new DefaultRiderExperienceResolver(
+        campaigns: xRiderCampaignStub(),
+        drivers: new RiderDriverLoader(new Filesystem),
+        stages: app(\LBHurtado\XRider\Contracts\RiderStageResolverContract::class),
+    );
+
+    $experience = $resolver->resolve(xRiderTestSubject(), [
+        'rider' => [
+            'stages' => [
+                [
+                    'type' => 'splash',
+                    'key' => 'test-splash',
+                    'content' => 'Stage splash content.',
+                    'content_type' => 'text',
+                    'timeout' => 3,
+                ],
+            ],
+        ],
+    ]);
+
+    expect($experience->preClaim)->not->toBeNull()
+        ->and($experience->preClaim?->content)->toBe('Stage splash content.')
+        ->and($experience->preClaim?->normalizedType())->toBe('text')
+        ->and($experience->preClaim?->meta['source'])->toBe('stage')
+        ->and($experience->preClaim?->meta['stage_key'])->toBe('test-splash')
+        ->and($experience->preClaim?->meta['timeout'])->toBe(3);
+});
+
+it('keeps legacy pre claim precedence over splash stages', function () {
+    config()->set('x-rider.package_drivers_path', __DIR__.'/../../resources/rider-drivers');
+
+    $resolver = new DefaultRiderExperienceResolver(
+        campaigns: xRiderCampaignStub(),
+        drivers: new RiderDriverLoader(new Filesystem),
+        stages: app(\LBHurtado\XRider\Contracts\RiderStageResolverContract::class),
+    );
+
+    $experience = $resolver->resolve(xRiderTestSubject(), [
+        'rider' => [
+            'pre_claim' => [
+                'enabled' => true,
+                'type' => 'markdown',
+                'content' => 'Legacy pre-claim wins.',
+            ],
+            'stages' => [
+                [
+                    'type' => 'splash',
+                    'key' => 'test-splash',
+                    'content' => 'Stage splash loses.',
+                ],
+            ],
+        ],
+    ]);
+
+    expect($experience->preClaim)->not->toBeNull()
+        ->and($experience->preClaim?->content)->toBe('Legacy pre-claim wins.');
+});
