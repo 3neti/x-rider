@@ -64,6 +64,7 @@ class XRiderServiceProvider extends ServiceProvider
             __DIR__.'/../resources/js/pages/x-rider' => resource_path('js/pages/x-rider'),
             __DIR__.'/../resources/js/components/x-rider' => resource_path('js/components/x-rider'),
             __DIR__.'/../resources/js/composables' => resource_path('js/composables'),
+            __DIR__.'/../resources/js/components/x-rider/types.ts' => resource_path('js/components/x-rider/types.ts'),
         ], 'x-rider-ui');
 
         if ((bool) config('x-rider.routes.enabled', true)) {
