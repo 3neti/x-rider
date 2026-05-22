@@ -3,14 +3,7 @@ import { computed } from 'vue';
 import RiderMessageStage from '@/components/x-rider/stages/RiderMessageStage.vue';
 import RiderSplashStage from '@/components/x-rider/stages/RiderSplashStage.vue';
 import RiderLinkStage from '@/components/x-rider/stages/RiderLinkStage.vue';
-
-interface RiderStage {
-  type: string;
-  enabled: boolean;
-  key?: string | null;
-  payload?: Record<string, unknown>;
-  meta?: Record<string, unknown>;
-}
+import type { RiderStage } from './types';
 
 const props = defineProps<{
   stages?: RiderStage[] | null;

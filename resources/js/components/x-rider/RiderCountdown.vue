@@ -2,14 +2,7 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { Button } from '@/components/ui/button';
 import { ExternalLink } from 'lucide-vue-next';
-
-interface RiderRedirect {
-  enabled: boolean;
-  url?: string | null;
-  timeout: number;
-  fallbackUrl?: string | null;
-  meta?: Record<string, unknown>;
-}
+import type { RiderRedirect } from './types';
 
 interface Props {
   redirect?: RiderRedirect | null;

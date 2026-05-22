@@ -1,14 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { marked } from 'marked';
-
-interface RiderStage {
-  type: string;
-  enabled: boolean;
-  key?: string | null;
-  payload?: Record<string, unknown>;
-  meta?: Record<string, unknown>;
-}
+import type { RiderStage } from '../types';
 
 const props = defineProps<{
   stage: RiderStage;

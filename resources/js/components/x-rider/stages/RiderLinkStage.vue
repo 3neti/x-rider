@@ -2,14 +2,7 @@
 import { computed } from 'vue';
 import { Button } from '@/components/ui/button';
 import { ExternalLink } from 'lucide-vue-next';
-
-interface RiderStage {
-  type: string;
-  enabled: boolean;
-  key?: string | null;
-  payload?: Record<string, unknown>;
-  meta?: Record<string, unknown>;
-}
+import type { RiderStage } from '../types';
 
 const props = defineProps<{
   stage: RiderStage;
