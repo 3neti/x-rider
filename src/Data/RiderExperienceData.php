@@ -13,6 +13,7 @@ class RiderExperienceData extends Data
         public ?RiderContentData $preClaim = null,
         public ?RiderContentData $success = null,
         public ?RiderRedirectData $redirect = null,
+        public ?RiderStageCollectionData $stages = null,
         public ?RiderCampaignData $campaign = null,
         public array $ads = [],
         public array $analytics = [],

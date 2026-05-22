@@ -4,6 +4,7 @@ namespace LBHurtado\XRider\Services;
 
 use LBHurtado\XRider\Contracts\RiderCampaignResolverContract;
 use LBHurtado\XRider\Contracts\RiderExperienceResolverContract;
+use LBHurtado\XRider\Contracts\RiderStageResolverContract;
 use LBHurtado\XRider\Data\RiderContentData;
 use LBHurtado\XRider\Data\RiderExperienceData;
 use LBHurtado\XRider\Data\RiderRedirectData;
@@ -17,6 +18,7 @@ class DefaultRiderExperienceResolver implements RiderExperienceResolverContract
     public function __construct(
         protected RiderCampaignResolverContract $campaigns,
         protected RiderDriverLoader $drivers,
+        protected RiderStageResolverContract $stages,
     ) {}
 
     public function resolve(RiderSubjectData $subject, array $context = []): RiderExperienceData
@@ -36,6 +38,11 @@ class DefaultRiderExperienceResolver implements RiderExperienceResolverContract
             is_array($driverRider) ? $driverRider : [],
             is_array($contextRider) ? $contextRider : [],
         );
+
+        $stageCollection = $this->stages->resolve($rider, [
+            'state' => $state->value,
+            'subject' => $subject,
+        ] + $context);
 
         $message = data_get($rider, 'message')
             ?? ($state === RiderOutcomeState::AcceptedPending
@@ -84,6 +91,7 @@ class DefaultRiderExperienceResolver implements RiderExperienceResolverContract
                 fallbackUrl: $fallbackUrl,
                 meta: data_get($rider, 'redirect.meta', []),
             ),
+            stages: $stageCollection,
             campaign: $this->campaigns->resolve($subject, $context),
             ads: data_get($context, 'ads', data_get($rider, 'ads', [])),
             analytics: array_replace_recursive(
