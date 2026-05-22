@@ -8,9 +8,11 @@ use LBHurtado\XRider\Contracts\RiderAnalyticsRecorderContract;
 use LBHurtado\XRider\Contracts\RiderCampaignResolverContract;
 use LBHurtado\XRider\Contracts\RiderExperienceResolverContract;
 use LBHurtado\XRider\Contracts\RiderRendererContract;
+use LBHurtado\XRider\Contracts\RiderStageResolverContract;
 use LBHurtado\XRider\Contracts\SuccessRedirectResolverContract;
 use LBHurtado\XRider\Services\DefaultRiderCampaignResolver;
 use LBHurtado\XRider\Services\DefaultRiderExperienceResolver;
+use LBHurtado\XRider\Services\DefaultRiderStageResolver;
 use LBHurtado\XRider\Services\DefaultSuccessRedirectResolver;
 use LBHurtado\XRider\Services\LogRiderAnalyticsRecorder;
 use LBHurtado\XRider\Services\RiderRenderer;
@@ -40,6 +42,7 @@ class XRiderServiceProvider extends ServiceProvider
                 ->register($this->app->make(RedirectStageDriver::class))
                 ->register($this->app->make(SplashStageDriver::class));
         });
+        $this->app->singleton(RiderStageResolverContract::class, DefaultRiderStageResolver::class);
     }
 
     public function boot(): void
