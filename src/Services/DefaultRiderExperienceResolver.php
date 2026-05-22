@@ -44,6 +44,9 @@ class DefaultRiderExperienceResolver implements RiderExperienceResolverContract
             'subject' => $subject,
         ] + $context);
 
+        $redirectStage = collect($stageCollection->redirectLike())
+            ->last(fn ($stage) => $stage->enabled);
+
         $message = data_get($rider, 'message')
             ?? ($state === RiderOutcomeState::AcceptedPending
                 ? data_get($rider, 'pending.content', config('x-rider.defaults.pending_message'))
@@ -55,15 +58,19 @@ class DefaultRiderExperienceResolver implements RiderExperienceResolverContract
             ?? config('x-rider.defaults.success_type')
         )) ?? RiderContentType::Markdown;
 
-        $redirectUrl = data_get($rider, 'url') ?? data_get($rider, 'redirect.url');
+        $redirectUrl = data_get($rider, 'url')
+            ?? data_get($redirectStage?->payload ?? [], 'url')
+            ?? data_get($rider, 'redirect.url');
 
         $redirectTimeout = (int) (
             data_get($rider, 'redirect_timeout')
+            ?? data_get($redirectStage?->payload ?? [], 'timeout')
             ?? data_get($rider, 'redirect.timeout')
             ?? config('x-rider.defaults.redirect_timeout')
         );
 
         $fallbackUrl = data_get($rider, 'fallback_url')
+            ?? data_get($redirectStage?->payload ?? [], 'fallback_url')
             ?? data_get($rider, 'redirect.fallback_url')
             ?? config('x-rider.redirects.fallback_url');
 
@@ -72,6 +79,7 @@ class DefaultRiderExperienceResolver implements RiderExperienceResolverContract
             rider: $rider,
             contextRider: is_array($contextRider) ? $contextRider : [],
             redirectUrl: $redirectUrl,
+            redirectStage: $redirectStage,
         );
 
         return new RiderExperienceData(
@@ -113,6 +121,7 @@ class DefaultRiderExperienceResolver implements RiderExperienceResolverContract
         array $rider,
         array $contextRider,
         mixed $redirectUrl,
+        ?\LBHurtado\XRider\Data\RiderStageData $redirectStage = null,
     ): bool {
         if (! $state->riderMayRun()) {
             return false;
@@ -126,12 +135,20 @@ class DefaultRiderExperienceResolver implements RiderExperienceResolverContract
             return false;
         }
 
+        if ($redirectStage?->enabled === false) {
+            return false;
+        }
+
         $enabled = (bool) data_get($contextRider, 'redirect.enabled', false)
             || (bool) data_get($contextRider, 'redirect_enabled', false)
             || filled(data_get($contextRider, 'url'))
             || filled(data_get($contextRider, 'redirect.url'))
             || (
                 (bool) data_get($rider, 'redirect.enabled', false)
+                && filled($redirectUrl)
+            )
+            || (
+                $redirectStage?->enabled === true
                 && filled($redirectUrl)
             );
 

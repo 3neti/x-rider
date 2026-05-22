@@ -124,10 +124,74 @@ it('attaches resolved stages to rider experience', function () {
         ],
     ]);
 
+    $legacyMessage = collect($experience->stages?->stages ?? [])
+        ->first(fn ($stage) => $stage->key === 'legacy-message');
+
+    $legacyRedirect = collect($experience->stages?->stages ?? [])
+        ->first(fn ($stage) => $stage->key === 'legacy-redirect');
+
     expect($experience->stages)->not->toBeNull()
-        ->and($experience->stages?->stages)->toHaveCount(2)
-        ->and($experience->stages?->firstOfType('message')?->payload['content'])->toBe('Stage message.')
-        ->and($experience->stages?->firstOfType('redirect')?->payload['url'])->toBe('https://merchant.example.com/thank-you')
+        ->and($legacyMessage?->payload['content'])->toBe('Stage message.')
+        ->and($legacyRedirect?->payload['url'])->toBe('https://merchant.example.com/thank-you')
         ->and($experience->success?->content)->toBe('Stage message.')
         ->and($experience->redirect?->enabled)->toBeTrue();
+});
+
+it('normalizes explicit redirect stage into rider redirect data', function () {
+    config()->set('x-rider.package_drivers_path', __DIR__.'/../../resources/rider-drivers');
+
+    $resolver = new DefaultRiderExperienceResolver(
+        campaigns: xRiderCampaignStub(),
+        drivers: new RiderDriverLoader(new Filesystem),
+        stages: app(\LBHurtado\XRider\Contracts\RiderStageResolverContract::class),
+    );
+
+    $experience = $resolver->resolve(xRiderTestSubject(), [
+        'rider' => [
+            'stages' => [
+                [
+                    'type' => 'message',
+                    'key' => 'test-message',
+                    'content' => 'Stage message.',
+                ],
+                [
+                    'type' => 'redirect',
+                    'key' => 'test-redirect',
+                    'url' => 'https://merchant.example.com/stage-redirect',
+                    'timeout' => 9,
+                    'fallback_url' => '/stage-fallback',
+                ],
+            ],
+        ],
+    ]);
+
+    expect($experience->redirect?->enabled)->toBeTrue()
+        ->and($experience->redirect?->url)->toBe('https://merchant.example.com/stage-redirect')
+        ->and($experience->redirect?->timeout)->toBe(9)
+        ->and($experience->redirect?->fallbackUrl)->toBe('/stage-fallback');
+});
+
+it('does not enable redirect when explicit redirect stage is disabled', function () {
+    config()->set('x-rider.package_drivers_path', __DIR__.'/../../resources/rider-drivers');
+
+    $resolver = new DefaultRiderExperienceResolver(
+        campaigns: xRiderCampaignStub(),
+        drivers: new RiderDriverLoader(new Filesystem),
+        stages: app(\LBHurtado\XRider\Contracts\RiderStageResolverContract::class),
+    );
+
+    $experience = $resolver->resolve(xRiderTestSubject(), [
+        'rider' => [
+            'stages' => [
+                [
+                    'type' => 'redirect',
+                    'enabled' => false,
+                    'url' => 'https://merchant.example.com/stage-redirect',
+                    'timeout' => 9,
+                ],
+            ],
+        ],
+    ]);
+
+    expect($experience->redirect?->enabled)->toBeFalse();
 });
