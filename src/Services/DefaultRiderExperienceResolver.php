@@ -47,13 +47,19 @@ class DefaultRiderExperienceResolver implements RiderExperienceResolverContract
         $redirectStage = collect($stageCollection->redirectLike())
             ->last(fn ($stage) => $stage->enabled);
 
+        $messageStage = collect($stageCollection->renderable())
+            ->filter(fn ($stage) => $stage->normalizedType() === 'message')
+            ->last(fn ($stage) => $stage->enabled);
+
         $message = data_get($rider, 'message')
+            ?? data_get($messageStage?->payload ?? [], 'content')
             ?? ($state === RiderOutcomeState::AcceptedPending
                 ? data_get($rider, 'pending.content', config('x-rider.defaults.pending_message'))
                 : data_get($rider, 'success.content', config('x-rider.defaults.success_message')));
 
         $successType = RiderContentType::tryFrom((string) (
             data_get($rider, 'type')
+            ?? data_get($messageStage?->payload ?? [], 'content_type')
             ?? data_get($rider, 'success.type')
             ?? config('x-rider.defaults.success_type')
         )) ?? RiderContentType::Markdown;

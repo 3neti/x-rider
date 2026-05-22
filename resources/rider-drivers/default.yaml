@@ -2,23 +2,13 @@ name: default
 version: 1.0.0
 
 rider:
-  stages:
-    - type: splash
-      key: default-splash
-      content: |
-        STAGE SPLASH: Welcome!
-      timeout: 2
-
-    - type: message
-      key: default-message
-      content: |
-        STAGE MESSAGE: Enjoy your reward.
+  stages: []
 
   success:
     enabled: true
     type: markdown
     content: |
-      LEGACY SUCCESS: Thank you. Your claim has been received.
+      Thank you. Your claim has been received.
 
   pending:
     enabled: true

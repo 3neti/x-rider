@@ -195,3 +195,54 @@ it('does not enable redirect when explicit redirect stage is disabled', function
 
     expect($experience->redirect?->enabled)->toBeFalse();
 });
+
+it('normalizes explicit message stage into rider success content', function () {
+    config()->set('x-rider.package_drivers_path', __DIR__.'/../../resources/rider-drivers');
+
+    $resolver = new DefaultRiderExperienceResolver(
+        campaigns: xRiderCampaignStub(),
+        drivers: new RiderDriverLoader(new Filesystem),
+        stages: app(\LBHurtado\XRider\Contracts\RiderStageResolverContract::class),
+    );
+
+    $experience = $resolver->resolve(xRiderTestSubject(), [
+        'rider' => [
+            'stages' => [
+                [
+                    'type' => 'message',
+                    'key' => 'test-message',
+                    'content' => 'Stage-driven thank you.',
+                    'content_type' => 'text',
+                ],
+            ],
+        ],
+    ]);
+
+    expect($experience->success?->content)->toBe('Stage-driven thank you.')
+        ->and($experience->success?->normalizedType())->toBe('text');
+});
+
+it('keeps legacy rider message precedence over message stages', function () {
+    config()->set('x-rider.package_drivers_path', __DIR__.'/../../resources/rider-drivers');
+
+    $resolver = new DefaultRiderExperienceResolver(
+        campaigns: xRiderCampaignStub(),
+        drivers: new RiderDriverLoader(new Filesystem),
+        stages: app(\LBHurtado\XRider\Contracts\RiderStageResolverContract::class),
+    );
+
+    $experience = $resolver->resolve(xRiderTestSubject(), [
+        'rider' => [
+            'message' => 'Legacy message wins.',
+            'stages' => [
+                [
+                    'type' => 'message',
+                    'key' => 'test-message',
+                    'content' => 'Stage message loses.',
+                ],
+            ],
+        ],
+    ]);
+
+    expect($experience->success?->content)->toBe('Legacy message wins.');
+});
