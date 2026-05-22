@@ -14,6 +14,9 @@ use LBHurtado\XRider\Services\DefaultRiderExperienceResolver;
 use LBHurtado\XRider\Services\DefaultSuccessRedirectResolver;
 use LBHurtado\XRider\Services\LogRiderAnalyticsRecorder;
 use LBHurtado\XRider\Services\RiderRenderer;
+use LBHurtado\XRider\StageDrivers\MessageStageDriver;
+use LBHurtado\XRider\StageDrivers\RedirectStageDriver;
+use LBHurtado\XRider\StageDrivers\SplashStageDriver;
 use LBHurtado\XRider\Support\RiderDriverLoader;
 use LBHurtado\XRider\Support\RiderStageDriverRegistry;
 
@@ -31,6 +34,12 @@ class XRiderServiceProvider extends ServiceProvider
         $this->app->singleton(RiderAnalyticsRecorderContract::class, LogRiderAnalyticsRecorder::class);
         $this->app->singleton(RiderRendererContract::class, RiderRenderer::class);
         $this->app->singleton(RiderStageDriverRegistry::class);
+        $this->app->afterResolving(RiderStageDriverRegistry::class, function (RiderStageDriverRegistry $registry): void {
+            $registry
+                ->register($this->app->make(MessageStageDriver::class))
+                ->register($this->app->make(RedirectStageDriver::class))
+                ->register($this->app->make(SplashStageDriver::class));
+        });
     }
 
     public function boot(): void
