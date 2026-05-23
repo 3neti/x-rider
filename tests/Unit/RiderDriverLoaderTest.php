@@ -52,3 +52,19 @@ it('throws when a driver does not exist', function () {
 
     $loader->load('missing');
 })->throws(RiderDriverNotFound::class);
+
+it('loads the package demo driver', function () {
+    config()->set('x-rider.package_drivers_path', __DIR__.'/../../resources/rider-drivers');
+
+    $loader = new \LBHurtado\XRider\Support\RiderDriverLoader(
+        new \Illuminate\Filesystem\Filesystem
+    );
+
+    $driver = $loader->load('demo');
+
+    expect($driver['name'])->toBe('demo')
+        ->and(data_get($driver, 'rider.stages'))->toHaveCount(3)
+        ->and(data_get($driver, 'rider.stages.0.key'))->toBe('demo-pre-claim')
+        ->and(data_get($driver, 'rider.stages.1.key'))->toBe('demo-success-message')
+        ->and(data_get($driver, 'rider.stages.2.key'))->toBe('demo-redirect');
+});

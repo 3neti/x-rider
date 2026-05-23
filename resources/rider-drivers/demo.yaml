@@ -1,0 +1,44 @@
+name: demo
+version: 1.0.0
+
+rider:
+  stages:
+    - type: splash
+      key: demo-pre-claim
+      content: |
+        PRE-CLAIM DEMO: Please review this before continuing.
+      content_type: markdown
+      timeout: 3
+
+    - type: message
+      key: demo-success-message
+      content: |
+        SUCCESS DEMO: Thank you for claiming.
+      content_type: markdown
+
+    - type: redirect
+      key: demo-redirect
+      enabled: false
+      url: https://example.com
+      timeout: 5
+      fallback_url: /x/claim
+
+  success:
+    enabled: true
+    type: markdown
+    content: |
+      Demo claim received.
+
+  pending:
+    enabled: true
+    type: markdown
+    content: |
+      Demo claim is being processed.
+
+  redirect:
+    enabled: false
+    timeout: 5
+    fallback_url: /x/claim
+
+  analytics:
+    enabled: true
