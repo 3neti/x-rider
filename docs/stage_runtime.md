@@ -1,6 +1,6 @@
 # x-rider Stage Runtime
 
-Version: 1.0  
+Version: 1.1  
 Status: Stabilized Runtime Contract
 
 ---
@@ -74,6 +74,7 @@ RiderStageData(
     type,
     enabled,
     key,
+    presentation,
     payload,
     meta,
 )
@@ -86,6 +87,7 @@ Serialized example:
   "type": "message",
   "enabled": true,
   "key": "thank-you-message",
+  "presentation": "inline",
   "payload": {
     "content": "Thank you.",
     "content_type": "markdown"
@@ -105,6 +107,7 @@ Serialized example:
 | `type` | string | Runtime stage type |
 | `enabled` | bool | Whether the stage is active |
 | `key` | string/null | Stable identifier |
+| `presentation` | string | Runtime presentation mode |
 | `payload` | array | Driver-specific data |
 | `meta` | array | Additional metadata |
 
@@ -148,6 +151,8 @@ Implemented drivers:
 MessageStageDriver
 RedirectStageDriver
 SplashStageDriver
+ImageStageDriver
+LinkStageDriver
 ```
 
 Frontend-rendered stages:
@@ -155,6 +160,7 @@ Frontend-rendered stages:
 ```text
 message
 splash
+image
 link
 ```
 
@@ -211,6 +217,7 @@ normalize rider configuration
 support legacy compatibility
 build stage DTOs
 maintain runtime ordering
+preserve payload semantics
 ```
 
 ---
@@ -365,7 +372,88 @@ which allows future modal/fullscreen runtime orchestration without changing the 
 
 ---
 
-# 11. Precedence Rules
+## 10.4 Image Stage
+
+Stage:
+
+```yaml
+- type: image
+  presentation: inline
+  src: https://placehold.co/1200x400
+  alt: "Hero banner"
+```
+
+Normalizes into:
+
+```php
+$experience->stages
+```
+
+Payload example:
+
+```php
+[
+    'src' => 'https://placehold.co/1200x400',
+    'alt' => 'Hero banner',
+]
+```
+
+---
+
+## 10.5 Link Stage
+
+Stage:
+
+```yaml
+- type: link
+  label: "Learn more"
+  url: "https://example.com"
+```
+
+Normalizes into:
+
+```php
+$experience->stages
+```
+
+Payload example:
+
+```php
+[
+    'label' => 'Learn more',
+    'url' => 'https://example.com',
+]
+```
+
+---
+
+# 11. Presentation Modes
+
+Presentation mode defines how the frontend should surface the stage.
+
+Supported modes:
+
+| Mode | Meaning |
+|---|---|
+| `inline` | Embedded directly into the current screen |
+| `modal` | Interruptive overlay |
+| `fullscreen` | Full immersive takeover |
+
+Current runtime support:
+
+| Mode | Status |
+|---|---|
+| inline | Implemented |
+| modal | Reserved |
+| fullscreen | Reserved |
+
+The runtime recognizes all presentation modes now to preserve forward compatibility.
+
+Frontend runtimes SHOULD gracefully ignore unsupported modes.
+
+---
+
+# 12. Precedence Rules
 
 The runtime follows strict precedence rules.
 
@@ -383,7 +471,7 @@ config fallback
 
 ---
 
-## 11.1 Message Precedence
+## 12.1 Message Precedence
 
 ```text
 rider.message
@@ -397,7 +485,7 @@ x-rider.defaults.success_message
 
 ---
 
-## 11.2 Redirect URL Precedence
+## 12.2 Redirect URL Precedence
 
 ```text
 rider.url
@@ -409,7 +497,7 @@ rider.redirect.url
 
 ---
 
-## 11.3 Redirect Timeout Precedence
+## 12.3 Redirect Timeout Precedence
 
 ```text
 rider.redirect_timeout
@@ -423,7 +511,7 @@ x-rider.defaults.redirect_timeout
 
 ---
 
-## 11.4 Splash / Pre-Claim Precedence
+## 12.4 Splash / Pre-Claim Precedence
 
 ```text
 rider.pre_claim
@@ -435,7 +523,7 @@ null
 
 ---
 
-# 12. Package Default Rule
+# 13. Package Default Rule
 
 Package default configuration must remain safe and neutral.
 
@@ -470,7 +558,7 @@ not package defaults.
 
 ---
 
-## 12.1 Demo Driver
+## 13.1 Demo Driver
 
 The package may include a separate demo driver:
 
@@ -546,13 +634,15 @@ demo.yaml = visible testing behavior
 custom driver = host/application-specific behavior
 ```
 
-# 13. Frontend Rendering Contract
+---
 
-The x-change success page currently uses:
+# 14. Frontend Rendering Contract
+
+The x-change preview runtime currently uses:
 
 ```vue
-<RiderStageRenderer :stages="riderStages" />
-<RiderCountdown :redirect="riderRedirect" />
+<RiderRenderer :content="preClaimContent" />
+<RiderStagePresenter :stage="stage" />
 ```
 
 Current rendered stages:
@@ -560,6 +650,7 @@ Current rendered stages:
 ```text
 message
 splash
+image
 link
 ```
 
@@ -569,7 +660,7 @@ Redirect orchestration remains centralized.
 
 ---
 
-# 14. Safe Redirect Rule
+# 15. Safe Redirect Rule
 
 External redirects are never opened directly from stage renderers.
 
@@ -605,7 +696,7 @@ This should never be enabled in production.
 
 ---
 
-# 15. Analytics Rule
+# 16. Analytics Rule
 
 Stage drivers themselves do not emit analytics.
 
@@ -622,7 +713,7 @@ This keeps drivers pure and deterministic.
 
 ---
 
-# 16. Extension Rules
+# 17. Extension Rules
 
 Future stage drivers should follow these rules:
 
@@ -638,7 +729,7 @@ Future stage drivers should follow these rules:
 
 ---
 
-# 17. Deferred Runtime Types
+# 18. Deferred Runtime Types
 
 Deferred runtime types include:
 
@@ -659,7 +750,7 @@ These should extend the stage runtime rather than bypass it.
 
 ---
 
-# 18. Architectural Principles
+# 19. Architectural Principles
 
 The stage runtime follows these principles:
 
@@ -685,7 +776,7 @@ into distinct layers.
 
 ---
 
-# 19. Current Status
+# 20. Current Status
 
 Completed:
 
@@ -697,12 +788,17 @@ Completed:
 ✅ message stage driver
 ✅ redirect stage driver
 ✅ splash stage driver
+✅ image stage driver
+✅ link stage driver
 ✅ stage resolver
 ✅ stages attached to RiderExperienceData
 ✅ stage renderer scaffold
+✅ image stage renderer
+✅ link stage renderer
 ✅ message normalization
 ✅ redirect normalization
 ✅ splash/pre-claim normalization
+✅ presentation mode semantics
 ✅ safe redirect runtime
 ✅ legacy compatibility
 ```
@@ -710,6 +806,8 @@ Completed:
 Deferred:
 
 ```text
+⬜ modal orchestration runtime
+⬜ fullscreen orchestration runtime
 ⬜ campaign runtime
 ⬜ ads orchestration
 ⬜ affiliate flows
@@ -722,7 +820,7 @@ Deferred:
 
 ---
 
-# 20. Summary
+# 21. Summary
 
 The x-rider stage runtime now provides:
 
@@ -730,6 +828,8 @@ The x-rider stage runtime now provides:
 programmable post-transaction orchestration
 stable RiderExperienceData contracts
 safe redirect handling
+visual stage orchestration
+presentation semantics
 backward compatibility
 extensible runtime architecture
 ```
