@@ -30,6 +30,12 @@ rider:
         SUCCESS DEMO: Thank you for claiming.
       content_type: markdown
 
+    - type: link
+      key: demo-link
+      payload:
+        label: Learn more
+        url: https://example.com
+
     - type: redirect
       key: demo-redirect
       enabled: false

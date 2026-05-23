@@ -19,13 +19,7 @@ const presentation = computed<RiderPresentationMode>(() => {
   return 'inline';
 });
 
-const isRenderable = computed(() => {
-  return !!props.stage
-      && props.stage.enabled !== false
-      && props.stage.type !== 'redirect'
-      && presentation.value === 'inline'
-      && ['message', 'splash', 'link', 'image'].includes(props.stage.type);
-});
+const isInline = computed(() => presentation.value === 'inline');
 
 const normalizedContent = computed(() => {
   if (!props.stage) {
@@ -52,11 +46,46 @@ const normalizedContent = computed(() => {
     },
   };
 });
+
+const linkUrl = computed(() =>
+    props.stage?.payload?.url as string | undefined
+);
+
+const linkLabel = computed(() =>
+    (props.stage?.payload?.label as string | undefined)
+    ?? 'Open Link'
+);
+
+const shouldRenderContent = computed(() =>
+    !!props.stage
+    && props.stage.enabled !== false
+    && isInline.value
+    && ['message', 'splash', 'image'].includes(props.stage.type)
+    && !!normalizedContent.value?.content
+);
+
+const shouldRenderLink = computed(() =>
+    !!props.stage
+    && props.stage.enabled !== false
+    && isInline.value
+    && props.stage.type === 'link'
+    && !!linkUrl.value
+);
 </script>
 
 <template>
   <RiderRenderer
-      v-if="isRenderable"
+      v-if="shouldRenderContent"
       :content="normalizedContent"
   />
+
+  <a
+      v-else-if="shouldRenderLink"
+      :href="linkUrl"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="inline-flex w-full items-center justify-center rounded-full border border-primary/20 px-4 py-2 text-sm font-medium text-primary transition hover:bg-primary/5"
+  >
+    {{ linkLabel }}
+  </a>
 </template>
