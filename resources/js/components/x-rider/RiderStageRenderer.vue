@@ -3,6 +3,7 @@ import { computed } from 'vue';
 import RiderMessageStage from '@/components/x-rider/stages/RiderMessageStage.vue';
 import RiderSplashStage from '@/components/x-rider/stages/RiderSplashStage.vue';
 import RiderLinkStage from '@/components/x-rider/stages/RiderLinkStage.vue';
+import RiderImageStage from '@/components/x-rider/stages/RiderImageStage.vue';
 import type { RiderStage } from './types';
 
 const props = defineProps<{
@@ -21,6 +22,8 @@ const componentFor = (stage: RiderStage) => {
       return RiderSplashStage;
     case 'link':
       return RiderLinkStage;
+    case 'image':
+      return RiderImageStage;
     default:
       return null;
   }

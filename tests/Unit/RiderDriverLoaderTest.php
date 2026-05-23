@@ -63,9 +63,12 @@ it('loads the package demo driver', function () {
     $driver = $loader->load('demo');
 
     expect($driver['name'])->toBe('demo')
-        ->and(data_get($driver, 'rider.stages'))->toHaveCount(4)
+        ->and(data_get($driver, 'rider.stages'))->toHaveCount(5)
         ->and(data_get($driver, 'rider.stages.0.key'))->toBe('demo-pre-claim')
-        ->and(data_get($driver, 'rider.stages.1.key'))->toBe('demo-success-message')
+        ->and(data_get($driver, 'rider.stages.1.key'))->toBe('demo-image')
         ->and(data_get($driver, 'rider.stages.2.key'))->toBe('demo-link')
-        ->and(data_get($driver, 'rider.stages.3.key'))->toBe('demo-redirect');
+        ->and(data_get($driver, 'rider.stages.3.key'))->toBe('demo-success-message')
+        ->and(data_get($driver, 'rider.stages.4.key'))->toBe('demo-redirect')
+
+    ;
 });

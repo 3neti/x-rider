@@ -62,12 +62,21 @@ export interface RawRiderStage {
     type: string;
     enabled?: boolean;
     key?: string | null;
+
     payload?: Record<string, unknown>;
     meta?: Record<string, unknown>;
+
     content?: string | null;
     content_type?: string | null;
     timeout?: number | string | null;
+
     presentation?: RiderPresentationMode | string | null;
+
+    label?: string | null;
+    url?: string | null;
+
+    src?: string | null;
+    alt?: string | null;
 }
 
 export interface RiderPreviewPayload {

@@ -16,6 +16,7 @@ use LBHurtado\XRider\Services\DefaultRiderStageResolver;
 use LBHurtado\XRider\Services\DefaultSuccessRedirectResolver;
 use LBHurtado\XRider\Services\LogRiderAnalyticsRecorder;
 use LBHurtado\XRider\Services\RiderRenderer;
+use LBHurtado\XRider\StageDrivers\ImageStageDriver;
 use LBHurtado\XRider\StageDrivers\LinkStageDriver;
 use LBHurtado\XRider\StageDrivers\MessageStageDriver;
 use LBHurtado\XRider\StageDrivers\RedirectStageDriver;
@@ -42,7 +43,8 @@ class XRiderServiceProvider extends ServiceProvider
                 ->register($this->app->make(MessageStageDriver::class))
                 ->register($this->app->make(RedirectStageDriver::class))
                 ->register($this->app->make(SplashStageDriver::class))
-                ->register($this->app->make(LinkStageDriver::class));
+                ->register($this->app->make(LinkStageDriver::class))
+                ->register($this->app->make(ImageStageDriver::class));
         });
         $this->app->singleton(RiderStageResolverContract::class, DefaultRiderStageResolver::class);
     }

@@ -56,12 +56,20 @@ const linkLabel = computed(() =>
     ?? 'Open Link'
 );
 
-const shouldRenderContent = computed(() =>
+const imageSrc = computed(() =>
+    (props.stage?.payload?.src ?? props.stage?.src) as string | undefined
+);
+
+const imageAlt = computed(() =>
+    (props.stage?.payload?.alt ?? props.stage?.alt ?? '') as string
+);
+
+const shouldRenderImage = computed(() =>
     !!props.stage
     && props.stage.enabled !== false
     && isInline.value
-    && ['message', 'splash', 'image'].includes(props.stage.type)
-    && !!normalizedContent.value?.content
+    && props.stage.type === 'image'
+    && !!imageSrc.value
 );
 
 const shouldRenderLink = computed(() =>
@@ -71,12 +79,27 @@ const shouldRenderLink = computed(() =>
     && props.stage.type === 'link'
     && !!linkUrl.value
 );
+
+const shouldRenderContent = computed(() =>
+    !!props.stage
+    && props.stage.enabled !== false
+    && isInline.value
+    && ['message', 'splash'].includes(props.stage.type)
+    && !!normalizedContent.value?.content
+);
 </script>
 
 <template>
   <RiderRenderer
       v-if="shouldRenderContent"
       :content="normalizedContent"
+  />
+
+  <img
+      v-else-if="shouldRenderImage"
+      :src="imageSrc"
+      :alt="imageAlt"
+      class="w-full rounded-xl border object-cover"
   />
 
   <a
