@@ -5,10 +5,24 @@ rider:
   stages:
     - type: splash
       key: demo-pre-claim
+      presentation: inline
       content: |
         PRE-CLAIM DEMO: Please review this before continuing.
       content_type: markdown
       timeout: 3
+
+    # Future:
+    # - type: splash
+    #   key: demo-modal
+    #   presentation: modal
+    #   content: |
+    #     MODAL DEMO: This will render in a modal in a later slice.
+    #
+    # - type: splash
+    #   key: demo-fullscreen
+    #   presentation: fullscreen
+    #   content: |
+    #     FULLSCREEN DEMO: This will render before form-flow in a later slice.
 
     - type: message
       key: demo-success-message

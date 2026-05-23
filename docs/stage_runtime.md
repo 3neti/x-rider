@@ -301,21 +301,67 @@ Stage:
 
 ```yaml
 - type: splash
+  presentation: inline
   content: "Welcome."
   timeout: 2
 ```
 
-Normalizes into:
+Normalizes into a rider stage payload:
 
 ```php
-RiderExperienceData::preClaim
+$experience->stages
 ```
+
+and may also hydrate the embedded pre-claim experience surface:
+
+```php
+$experience->preClaim
+```
+
+Current runtime behavior:
+
+```text
+presentation: inline
+```
+
+renders inside the voucher preview page as the embedded pre-claim surface.
+
+Future runtime behavior:
+
+```text
+presentation: modal
+presentation: fullscreen
+```
+
+are recognized by the runtime but deferred for later orchestration slices.
 
 Result:
 
 ```php
 $experience->preClaim
+$experience->stages
 ```
+
+Example resolved payload:
+
+```php
+$experience->preClaim?->content
+// "Welcome."
+
+$experience->preClaim?->meta
+// [
+//     'stage_key' => '...',
+//     'presentation' => 'inline',
+// ]
+```
+
+The canonical stage data remains available through:
+
+```php
+$experience->stages
+```
+
+which allows future modal/fullscreen runtime orchestration without changing the normalized rider contract.
 
 ---
 

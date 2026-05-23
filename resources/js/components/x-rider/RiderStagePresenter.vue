@@ -1,22 +1,29 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import RiderRenderer from './RiderRenderer.vue';
-
-interface RiderStage {
-  type: string;
-  enabled?: boolean;
-  key?: string | null;
-  payload?: Record<string, unknown>;
-  meta?: Record<string, unknown>;
-}
+import type { RawRiderStage, RiderPresentationMode } from './types';
 
 const props = defineProps<{
-  stage?: RiderStage | null;
+  stage?: RawRiderStage | null;
 }>();
+
+const presentation = computed<RiderPresentationMode>(() => {
+  const value = props.stage?.payload?.presentation
+      ?? props.stage?.presentation
+      ?? 'inline';
+
+  if (value === 'modal' || value === 'fullscreen') {
+    return value;
+  }
+
+  return 'inline';
+});
 
 const isRenderable = computed(() => {
   return !!props.stage
       && props.stage.enabled !== false
+      && props.stage.type !== 'redirect'
+      && presentation.value === 'inline'
       && ['message', 'splash', 'link', 'image'].includes(props.stage.type);
 });
 
@@ -40,6 +47,7 @@ const normalizedContent = computed(() => {
     meta: {
       stage_key: props.stage.key,
       stage_type: props.stage.type,
+      presentation: presentation.value,
       ...(props.stage.meta ?? {}),
     },
   };

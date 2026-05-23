@@ -30,3 +30,20 @@ it('creates a disabled splash stage when no content exists', function () {
     expect($stage->enabled)->toBeFalse()
         ->and($stage->payload['content'])->toBeNull();
 });
+
+it('defaults splash presentation to inline', function () {
+    $stage = (new SplashStageDriver())->make([
+        'content' => 'Welcome!',
+    ]);
+
+    expect($stage->payload['presentation'])->toBe('inline');
+});
+
+it('supports configured splash presentation', function () {
+    $stage = (new SplashStageDriver())->make([
+        'content' => 'Welcome!',
+        'presentation' => 'fullscreen',
+    ]);
+
+    expect($stage->payload['presentation'])->toBe('fullscreen');
+});

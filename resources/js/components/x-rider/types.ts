@@ -1,3 +1,5 @@
+export type RiderPresentationMode = 'inline' | 'modal' | 'fullscreen';
+
 export interface RiderContent {
     enabled: boolean;
     type: string;
@@ -17,7 +19,21 @@ export interface RiderStage {
     type: string;
     enabled: boolean;
     key?: string | null;
+
+    /**
+     * Stage-driver-specific normalized payload.
+     *
+     * Examples:
+     * - splash payload
+     * - redirect payload
+     * - message payload
+     * - future video/cta payloads
+     */
     payload?: Record<string, unknown>;
+
+    /**
+     * Runtime metadata.
+     */
     meta?: Record<string, unknown>;
 }
 
@@ -51,6 +67,7 @@ export interface RawRiderStage {
     content?: string | null;
     content_type?: string | null;
     timeout?: number | string | null;
+    presentation?: RiderPresentationMode | string | null;
 }
 
 export interface RiderPreviewPayload {

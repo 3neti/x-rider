@@ -27,11 +27,15 @@ const renderedContent = computed(() => {
 });
 
 const timeout = computed(() => props.stage.payload?.timeout);
+
+const presentation = computed(() =>
+    (props.stage.payload?.presentation as string | undefined) ?? 'inline'
+);
 </script>
 
 <template>
   <div
-      v-if="stage.enabled && renderedContent"
+      v-if="stage.enabled && renderedContent && presentation === 'inline'"
       class="rounded-2xl border border-primary/10 bg-primary/5 p-4 text-center"
       :data-timeout="timeout"
   >
