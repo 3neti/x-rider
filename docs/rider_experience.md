@@ -640,6 +640,41 @@ Later:
 
 ---
 
+## 22.4 Demo Driver for Manual Testing
+
+x-rider keeps the package default driver neutral.
+
+For manual verification of rider behavior, use the demo driver:
+
+```text
+resources/rider-drivers/demo.yaml
+```
+
+The demo driver may include visible examples such as:
+
+```text
+pre-claim splash
+success message
+redirect example
+link/image stages
+```
+
+Use it only in sandbox or development:
+
+```env
+X_RIDER_DRIVER=demo
+```
+
+Production should use:
+
+```env
+X_RIDER_DRIVER=default
+```
+
+or a host-specific production-safe driver.
+
+---
+
 # 23. Sprint Plan
 
 ---

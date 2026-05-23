@@ -424,6 +424,82 @@ not package defaults.
 
 ---
 
+## 12.1 Demo Driver
+
+The package may include a separate demo driver:
+
+```text
+resources/rider-drivers/demo.yaml
+```
+
+The demo driver is intended for:
+
+```text
+manual testing
+sandbox verification
+developer onboarding
+visual confirmation of stage behavior
+```
+
+Example demo behavior may include:
+
+```text
+pre-claim splash
+success message
+disabled redirect example
+link/image samples
+```
+
+The demo driver must not be used as the production default.
+
+To test the demo driver in a host app, publish the rider drivers:
+
+```bash
+php artisan vendor:publish --tag=x-rider-drivers --force
+```
+
+Then configure the host to use the demo driver temporarily:
+
+```php
+config(['x-rider.driver' => 'demo']);
+```
+
+or pass runtime context explicitly:
+
+```php
+$riders->resolve($subject, [
+    'driver' => 'demo',
+]);
+```
+
+For local testing only, the host may also set the default driver in configuration:
+
+```php
+'driver' => env('X_RIDER_DRIVER', 'default'),
+```
+
+and then use:
+
+```env
+X_RIDER_DRIVER=demo
+```
+
+Production deployments should use:
+
+```env
+X_RIDER_DRIVER=default
+```
+
+or an explicit production-safe custom driver.
+
+Rule:
+
+```text
+default.yaml = neutral baseline
+demo.yaml = visible testing behavior
+custom driver = host/application-specific behavior
+```
+
 # 13. Frontend Rendering Contract
 
 The x-change success page currently uses:
