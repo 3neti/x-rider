@@ -36,3 +36,20 @@ it('supports legacy redirect timeout from context', function () {
 
     expect($stage->payload['timeout'])->toBe(3);
 });
+
+it('creates redirect payload for runtime execution', function () {
+    $stage = (new RedirectStageDriver())->make([
+        'payload' => [
+            'url' => 'https://example.com/success',
+            'timeout' => 5,
+            'external' => true,
+        ],
+    ]);
+
+    expect($stage->payload['url'])
+        ->toBe('https://example.com/success')
+        ->and($stage->payload['timeout'])
+        ->toBe(5)
+        ->and($stage->payload['external'])
+        ->toBeTrue();
+});

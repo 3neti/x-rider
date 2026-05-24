@@ -86,3 +86,9 @@ export interface RiderPreviewPayload {
     stages?: RiderStageCollection | null;
     meta?: Record<string, unknown>;
 }
+
+export interface RiderRedirectPayload {
+    url?: string | null;
+    timeout?: number | null;
+    external?: boolean | null;
+}

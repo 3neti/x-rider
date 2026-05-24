@@ -68,10 +68,10 @@ rider:
 
     - type: redirect
       key: demo-redirect
-      enabled: false
-      url: https://example.com
-      timeout: 5
-      fallback_url: /x/claim
+      payload:
+        url: https://example.com/success
+        timeout: 8
+        external: true
 
   success:
     enabled: true

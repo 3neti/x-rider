@@ -2,6 +2,7 @@
 import { computed, ref, watch } from 'vue';
 import RiderStagePresenter from './RiderStagePresenter.vue';
 import type { RawRiderStage } from './types';
+import RiderRedirectRuntime from '@/components/x-rider/RiderRedirectRuntime.vue';
 
 const props = withDefaults(defineProps<{
   stages?: RawRiderStage[] | null;
@@ -42,6 +43,21 @@ const visible = computed(() => !!activeStage.value);
 
 const isModal = computed(() => activePresentation.value === 'modal');
 const isFullscreen = computed(() => activePresentation.value === 'fullscreen');
+
+const redirectStage = computed<RawRiderStage | null>(() => {
+  const redirects = (props.stages ?? []).filter((stage) =>
+      stage.enabled !== false
+      && stage.type === 'redirect'
+  );
+
+  return redirects.length > 0
+      ? redirects[redirects.length - 1]
+      : null;
+});
+
+const sequenceComplete = computed(() =>
+    currentIndex.value >= runtimeStages.value.length
+);
 
 watch(
     () => props.stages,
@@ -102,4 +118,8 @@ function proceed(): void {
       </div>
     </section>
   </Teleport>
+  <RiderRedirectRuntime
+      v-if="sequenceComplete && redirectStage"
+      :stage="redirectStage"
+  />
 </template>
