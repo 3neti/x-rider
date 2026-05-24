@@ -36,6 +36,14 @@ rider:
         label: Learn more
         url: https://example.com
 
+    - type: splash
+      key: demo-modal
+      presentation: modal
+      content: |
+        MODAL DEMO: This appears as a dismissible Rider modal.
+      content_type: markdown
+      timeout: 3
+
     - type: message
       key: demo-success-message
       content: |

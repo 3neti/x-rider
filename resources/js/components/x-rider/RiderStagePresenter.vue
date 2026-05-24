@@ -3,9 +3,12 @@ import { computed } from 'vue';
 import RiderRenderer from './RiderRenderer.vue';
 import type { RawRiderStage, RiderPresentationMode } from './types';
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   stage?: RawRiderStage | null;
-}>();
+  force?: boolean;
+}>(), {
+  force: false,
+});
 
 const presentation = computed<RiderPresentationMode>(() => {
   const value = props.stage?.payload?.presentation
@@ -48,11 +51,11 @@ const normalizedContent = computed(() => {
 });
 
 const linkUrl = computed(() =>
-    props.stage?.payload?.url as string | undefined
+    (props.stage?.payload?.url ?? props.stage?.url) as string | undefined
 );
 
 const linkLabel = computed(() =>
-    (props.stage?.payload?.label as string | undefined)
+    ((props.stage?.payload?.label ?? props.stage?.label) as string | undefined)
     ?? 'Open Link'
 );
 
@@ -64,10 +67,22 @@ const imageAlt = computed(() =>
     (props.stage?.payload?.alt ?? props.stage?.alt ?? '') as string
 );
 
+const canRenderForPresentation = computed(() =>
+    props.force || isInline.value
+);
+
+const shouldRenderContent = computed(() =>
+    !!props.stage
+    && props.stage.enabled !== false
+    && canRenderForPresentation.value
+    && ['message', 'splash'].includes(props.stage.type)
+    && !!normalizedContent.value?.content
+);
+
 const shouldRenderImage = computed(() =>
     !!props.stage
     && props.stage.enabled !== false
-    && isInline.value
+    && canRenderForPresentation.value
     && props.stage.type === 'image'
     && !!imageSrc.value
 );
@@ -75,17 +90,9 @@ const shouldRenderImage = computed(() =>
 const shouldRenderLink = computed(() =>
     !!props.stage
     && props.stage.enabled !== false
-    && isInline.value
+    && canRenderForPresentation.value
     && props.stage.type === 'link'
     && !!linkUrl.value
-);
-
-const shouldRenderContent = computed(() =>
-    !!props.stage
-    && props.stage.enabled !== false
-    && isInline.value
-    && ['message', 'splash'].includes(props.stage.type)
-    && !!normalizedContent.value?.content
 );
 </script>
 
