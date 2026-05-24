@@ -36,6 +36,14 @@ rider:
         label: Learn more
         url: https://example.com
 
+    - type: cta
+      key: demo-cta
+      presentation: inline
+      payload:
+        label: Open Reward
+        action: open_url
+        url: https://example.com/reward
+
     - type: splash
       key: demo-modal
       presentation: modal

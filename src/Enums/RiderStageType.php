@@ -9,6 +9,7 @@ enum RiderStageType: string
     case Splash = 'splash';
     case Image = 'image';
     case Link = 'link';
+    case Cta = 'cta';
 
     public function isRenderable(): bool
     {
@@ -16,7 +17,8 @@ enum RiderStageType: string
             self::Message,
             self::Splash,
             self::Image,
-            self::Link => true,
+            self::Link,
+            self::Cta => true,
 
             self::Redirect => false,
         };

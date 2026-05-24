@@ -22,7 +22,7 @@ const runtimeStages = computed<RawRiderStage[]>(() =>
 
       return stage.enabled !== false
           && ['modal', 'fullscreen'].includes(presentation)
-          && ['splash', 'message', 'image', 'link'].includes(stage.type);
+          && ['splash', 'message', 'image', 'link', 'cta'].includes(stage.type);
     })
 );
 

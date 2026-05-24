@@ -22,7 +22,7 @@ const modalStages = computed<RawRiderStage[]>(() =>
 
       return stage.enabled !== false
           && presentation === 'modal'
-          && ['splash', 'message', 'image', 'link'].includes(stage.type);
+          && ['splash', 'message', 'image', 'link', 'cta'].includes(stage.type);
     })
 );
 

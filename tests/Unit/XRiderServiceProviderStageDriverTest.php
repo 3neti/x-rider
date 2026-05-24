@@ -9,5 +9,7 @@ it('registers default stage drivers through the service provider', function () {
         ->and($registry->has('redirect'))->toBeTrue()
         ->and($registry->has('splash'))->toBeTrue()
         ->and($registry->has('link'))->toBeTrue()
-        ->and($registry->has('image'))->toBeTrue();
+        ->and($registry->has('image'))->toBeTrue()
+        ->and($registry->has('cta'))->toBeTrue();
+    ;
 });

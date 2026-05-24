@@ -94,6 +94,33 @@ const shouldRenderLink = computed(() =>
     && props.stage.type === 'link'
     && !!linkUrl.value
 );
+
+const ctaAction = computed(() =>
+    (props.stage?.payload?.action ?? props.stage?.action ?? 'open_url') as string
+);
+
+const ctaUrl = computed(() =>
+    (props.stage?.payload?.url ?? props.stage?.url) as string | undefined
+);
+
+const ctaLabel = computed(() =>
+    ((props.stage?.payload?.label ?? props.stage?.label) as string | undefined)
+    ?? 'Continue'
+);
+
+const shouldRenderCta = computed(() =>
+    !!props.stage
+    && props.stage.enabled !== false
+    && canRenderForPresentation.value
+    && props.stage.type === 'cta'
+    && !!ctaLabel.value
+);
+
+function handleCta(): void {
+  if (ctaAction.value === 'open_url' && ctaUrl.value) {
+    window.open(ctaUrl.value, '_blank', 'noopener,noreferrer');
+  }
+}
 </script>
 
 <template>
@@ -118,4 +145,13 @@ const shouldRenderLink = computed(() =>
   >
     {{ linkLabel }}
   </a>
+
+  <button
+      v-else-if="shouldRenderCta"
+      type="button"
+      class="inline-flex w-full items-center justify-center rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition hover:bg-primary/90"
+      @click="handleCta"
+  >
+    {{ ctaLabel }}
+  </button>
 </template>

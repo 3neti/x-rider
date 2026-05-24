@@ -72,6 +72,7 @@ export interface RawRiderStage {
 
     presentation?: RiderPresentationMode | string | null;
 
+    action?: string | null;
     label?: string | null;
     url?: string | null;
 
