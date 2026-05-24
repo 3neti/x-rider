@@ -44,6 +44,14 @@ rider:
       content_type: markdown
       timeout: 3
 
+    - type: splash
+      key: demo-fullscreen
+      presentation: fullscreen
+      content: |
+        FULLSCREEN DEMO: This appears as an immersive Rider experience.
+      content_type: markdown
+      timeout: 3
+
     - type: message
       key: demo-success-message
       content: |
