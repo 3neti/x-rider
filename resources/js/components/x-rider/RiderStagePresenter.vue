@@ -1,159 +1,110 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import RiderRenderer from './RiderRenderer.vue';
-import type { RawRiderStage, RiderPresentationMode } from './types';
-import { inferStagePhase } from './useRiderStagePhase';
+import type { RawRiderStage } from './types';
 
-const props = withDefaults(defineProps<{
-  stage?: RawRiderStage | null;
-  force?: boolean;
-}>(), {
-  force: false,
-});
+interface Props {
+  stage: RawRiderStage;
+}
 
-const presentation = computed<RiderPresentationMode>(() => {
-  const value = props.stage?.payload?.presentation
-      ?? props.stage?.presentation
-      ?? 'inline';
+const props = defineProps<Props>();
 
-  if (value === 'modal' || value === 'fullscreen') {
-    return value;
-  }
+const dismissed = ref(false);
 
-  return 'inline';
-});
-
-const isInline = computed(() => presentation.value === 'inline');
-
-const normalizedContent = computed(() => {
-  if (!props.stage) {
-    return null;
-  }
-
-  return {
-    enabled: props.stage.enabled !== false,
-    type: (
-        props.stage.payload?.content_type
-        ?? props.stage.content_type
-        ?? 'markdown'
-    ) as string,
-    content: (
-        props.stage.payload?.content
-        ?? props.stage.content
-        ?? null
-    ) as string | null,
-    meta: {
-      stage_key: props.stage.key,
-      stage_type: props.stage.type,
-      presentation: presentation.value,
-      phase: inferStagePhase(props.stage),
-      ...(props.stage.meta ?? {}),
-    },
-  };
-});
-
-const linkUrl = computed(() =>
-    (props.stage?.payload?.url ?? props.stage?.url) as string | undefined
+const presentation = computed(() =>
+    String(
+        props.stage.payload?.presentation
+        ?? props.stage.presentation
+        ?? 'inline'
+    ).trim().toLowerCase()
 );
 
-const linkLabel = computed(() =>
-    ((props.stage?.payload?.label ?? props.stage?.label) as string | undefined)
-    ?? 'Open Link'
+const isModal = computed(() => presentation.value === 'modal');
+const isFullscreen = computed(() => presentation.value === 'fullscreen');
+
+const label = computed(() =>
+    String(props.stage.payload?.label ?? 'Continue')
+);
+
+const url = computed(() =>
+    String(props.stage.payload?.url ?? props.stage.src ?? '')
 );
 
 const imageSrc = computed(() =>
-    (props.stage?.payload?.src ?? props.stage?.src) as string | undefined
+    String(props.stage.src ?? props.stage.payload?.src ?? '')
 );
 
 const imageAlt = computed(() =>
-    (props.stage?.payload?.alt ?? props.stage?.alt ?? '') as string
+    String(props.stage.alt ?? props.stage.payload?.alt ?? 'Rider image')
 );
 
-const canRenderForPresentation = computed(() =>
-    props.force || isInline.value
-);
+const stageContent = computed(() => ({
+  enabled: props.stage.enabled !== false,
+  type: props.stage.content_type ?? 'markdown',
+  content: props.stage.content ?? '',
+}));
 
-const shouldRenderContent = computed(() =>
-    !!props.stage
-    && props.stage.enabled !== false
-    && canRenderForPresentation.value
-    && ['message', 'splash'].includes(props.stage.type)
-    && !!normalizedContent.value?.content
-);
-
-const shouldRenderImage = computed(() =>
-    !!props.stage
-    && props.stage.enabled !== false
-    && canRenderForPresentation.value
-    && props.stage.type === 'image'
-    && !!imageSrc.value
-);
-
-const shouldRenderLink = computed(() =>
-    !!props.stage
-    && props.stage.enabled !== false
-    && canRenderForPresentation.value
-    && props.stage.type === 'link'
-    && !!linkUrl.value
-);
-
-const ctaAction = computed(() =>
-    (props.stage?.payload?.action ?? props.stage?.action ?? 'open_url') as string
-);
-
-const ctaUrl = computed(() =>
-    (props.stage?.payload?.url ?? props.stage?.url) as string | undefined
-);
-
-const ctaLabel = computed(() =>
-    ((props.stage?.payload?.label ?? props.stage?.label) as string | undefined)
-    ?? 'Continue'
-);
-
-const shouldRenderCta = computed(() =>
-    !!props.stage
-    && props.stage.enabled !== false
-    && canRenderForPresentation.value
-    && props.stage.type === 'cta'
-    && !!ctaLabel.value
-);
-
-function handleCta(): void {
-  if (ctaAction.value === 'open_url' && ctaUrl.value) {
-    window.open(ctaUrl.value, '_blank', 'noopener,noreferrer');
-  }
+function dismiss(): void {
+  dismissed.value = true;
 }
 </script>
 
 <template>
-  <RiderRenderer
-      v-if="shouldRenderContent"
-      :content="normalizedContent"
-  />
+  <template v-if="!dismissed">
+    <div
+        :class="{
+                'fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4': isModal,
+                'fixed inset-0 z-50 flex items-center justify-center bg-background px-6': isFullscreen,
+            }"
+    >
+      <div
+          :class="{
+                    'w-full max-w-md rounded-2xl bg-background p-5 shadow-xl': isModal,
+                    'mx-auto w-full max-w-lg space-y-6 text-center': isFullscreen,
+                    'space-y-3': !isModal && !isFullscreen,
+                }"
+      >
+        <RiderRenderer
+            v-if="stage.content"
+            :content="stageContent"
+        />
 
-  <img
-      v-else-if="shouldRenderImage"
-      :src="imageSrc"
-      :alt="imageAlt"
-      class="w-full rounded-xl border object-cover"
-  />
+        <img
+            v-else-if="stage.type === 'image' && imageSrc"
+            :src="imageSrc"
+            :alt="imageAlt"
+            class="w-full rounded-xl object-cover"
+        />
 
-  <a
-      v-else-if="shouldRenderLink"
-      :href="linkUrl"
-      target="_blank"
-      rel="noopener noreferrer"
-      class="inline-flex w-full items-center justify-center rounded-full border border-primary/20 px-4 py-2 text-sm font-medium text-primary transition hover:bg-primary/5"
-  >
-    {{ linkLabel }}
-  </a>
+        <a
+            v-else-if="stage.type === 'link' && url"
+            :href="url"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex text-sm font-medium text-primary underline"
+        >
+          {{ label }}
+        </a>
 
-  <button
-      v-else-if="shouldRenderCta"
-      type="button"
-      class="inline-flex w-full items-center justify-center rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition hover:bg-primary/90"
-      @click="handleCta"
-  >
-    {{ ctaLabel }}
-  </button>
+        <a
+            v-else-if="stage.type === 'cta' && url"
+            :href="url"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+        >
+          {{ label }}
+        </a>
+
+        <button
+            v-if="isModal || isFullscreen"
+            type="button"
+            class="w-full rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+            @click="dismiss"
+        >
+          Continue
+        </button>
+      </div>
+    </div>
+  </template>
 </template>
