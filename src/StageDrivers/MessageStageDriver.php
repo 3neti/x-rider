@@ -16,12 +16,19 @@ class MessageStageDriver implements RiderStageDriverContract
 
     public function make(array $config = [], array $context = []): RiderStageData
     {
-        $content = data_get($config, 'content')
+        $payload = (array) data_get($config, 'payload', []);
+
+        $content = data_get($payload, 'content')
+            ?? data_get($config, 'content')
             ?? data_get($config, 'message')
             ?? data_get($context, 'message');
 
-        $contentType = RiderContentType::tryFrom((string) data_get($config, 'content_type', data_get($config, 'type', RiderContentType::Markdown->value)))
-            ?? RiderContentType::Markdown;
+        $contentType = RiderContentType::tryFrom((string) (
+            data_get($payload, 'content_type')
+            ?? data_get($config, 'content_type')
+            ?? data_get($context, 'content_type')
+            ?? RiderContentType::Markdown->value
+        )) ?? RiderContentType::Markdown;
 
         return new RiderStageData(
             type: RiderStageType::Message,
@@ -30,6 +37,7 @@ class MessageStageDriver implements RiderStageDriverContract
             payload: [
                 'content' => $content,
                 'content_type' => $contentType->value,
+                'phase' => data_get($payload, 'phase', data_get($config, 'phase')),
             ],
             meta: (array) data_get($config, 'meta', []),
         );

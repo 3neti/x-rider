@@ -3,6 +3,7 @@ import { computed, ref, watch } from 'vue';
 import RiderStagePresenter from './RiderStagePresenter.vue';
 import type { RawRiderStage } from './types';
 import RiderRedirectRuntime from '@/components/x-rider/RiderRedirectRuntime.vue';
+import { stageIsInPhase } from './useRiderStagePhase';
 
 const props = withDefaults(defineProps<{
   stages?: RawRiderStage[] | null;
@@ -13,18 +14,26 @@ const props = withDefaults(defineProps<{
 
 const currentIndex = ref(0);
 
-const runtimeStages = computed<RawRiderStage[]>(() =>
-    (props.stages ?? []).filter((stage) => {
-      const presentation = String(
-          stage.payload?.presentation
-          ?? stage.presentation
-          ?? 'inline'
-      ).trim().toLowerCase();
+// const runtimeStages = computed<RawRiderStage[]>(() =>
+//     (props.stages ?? []).filter((stage) => {
+//       const presentation = String(
+//           stage.payload?.presentation
+//           ?? stage.presentation
+//           ?? 'inline'
+//       ).trim().toLowerCase();
+//
+//       return stage.enabled !== false
+//           && ['modal', 'fullscreen'].includes(presentation)
+//           && ['splash', 'message', 'image', 'link', 'cta'].includes(stage.type);
+//     })
+// );
 
-      return stage.enabled !== false
-          && ['modal', 'fullscreen'].includes(presentation)
-          && ['splash', 'message', 'image', 'link', 'cta'].includes(stage.type);
-    })
+const runtimeStages = computed<RawRiderStage[]>(() =>
+    (props.stages ?? []).filter((stage) =>
+        stage.enabled !== false
+        && stageIsInPhase(stage, 'runtime')
+        && ['splash', 'message', 'image', 'link', 'cta'].includes(stage.type)
+    )
 );
 
 const activeStage = computed<RawRiderStage | null>(() =>
@@ -44,10 +53,22 @@ const visible = computed(() => !!activeStage.value);
 const isModal = computed(() => activePresentation.value === 'modal');
 const isFullscreen = computed(() => activePresentation.value === 'fullscreen');
 
+// const redirectStage = computed<RawRiderStage | null>(() => {
+//   const redirects = (props.stages ?? []).filter((stage) =>
+//       stage.enabled !== false
+//       && stage.type === 'redirect'
+//   );
+//
+//   return redirects.length > 0
+//       ? redirects[redirects.length - 1]
+//       : null;
+// });
+
 const redirectStage = computed<RawRiderStage | null>(() => {
   const redirects = (props.stages ?? []).filter((stage) =>
       stage.enabled !== false
       && stage.type === 'redirect'
+      && stageIsInPhase(stage, 'redirect')
   );
 
   return redirects.length > 0

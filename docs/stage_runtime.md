@@ -222,6 +222,23 @@ preserve payload semantics
 
 ---
 
+# Stage Phase Scoping
+
+Stages may optionally declare `phase`.
+
+If omitted, phase is inferred:
+
+| Rule | Phase |
+|---|---|
+| inline splash/image/link/cta | pre_claim |
+| message | success |
+| modal/fullscreen | runtime |
+| redirect | redirect |
+
+Explicit phase always wins.
+
+---
+
 # 9. Legacy Compatibility
 
 Legacy rider shape remains supported:

@@ -53,6 +53,13 @@ export interface RiderExperience {
     meta?: Record<string, unknown>;
 }
 
+export type RiderStagePhase =
+    | 'pre_claim'
+    | 'runtime'
+    | 'success'
+    | 'redirect'
+    | 'post_claim';
+
 /**
  * Loose raw stage shape for preview payloads that still expose original YAML config.
  *
@@ -63,7 +70,12 @@ export interface RawRiderStage {
     enabled?: boolean;
     key?: string | null;
 
-    payload?: Record<string, unknown>;
+    phase?: RiderStagePhase | string | null;
+
+    payload?: Record<string, unknown> & {
+        phase?: RiderStagePhase | string | null;
+        presentation?: RiderPresentationMode | string | null;
+    };
     meta?: Record<string, unknown>;
 
     content?: string | null;

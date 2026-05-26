@@ -36,6 +36,7 @@ class RedirectStageDriver implements RiderStageDriverContract
             'url' => $url,
             'timeout' => $timeout,
             'fallback_url' => $fallbackUrl,
+            'phase' => data_get($payload, 'phase', data_get($config, 'phase')),
         ];
 
         if (is_bool($external)) {

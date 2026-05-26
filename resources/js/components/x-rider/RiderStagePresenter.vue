@@ -2,6 +2,7 @@
 import { computed } from 'vue';
 import RiderRenderer from './RiderRenderer.vue';
 import type { RawRiderStage, RiderPresentationMode } from './types';
+import { inferStagePhase } from './useRiderStagePhase';
 
 const props = withDefaults(defineProps<{
   stage?: RawRiderStage | null;
@@ -45,6 +46,7 @@ const normalizedContent = computed(() => {
       stage_key: props.stage.key,
       stage_type: props.stage.type,
       presentation: presentation.value,
+      phase: inferStagePhase(props.stage),
       ...(props.stage.meta ?? {}),
     },
   };

@@ -32,6 +32,7 @@ class SplashStageDriver implements RiderStageDriverContract
                 'content_type' => $contentType->value,
                 'timeout' => data_get($config, 'timeout', data_get($context, 'splash_timeout')),
                 'presentation' => data_get($config, 'presentation', data_get($context, 'splash_presentation', 'inline')),
+                'phase' => data_get($config, 'phase', data_get($context, 'phase')),
             ],
             meta: (array) data_get($config, 'meta', []),
         );

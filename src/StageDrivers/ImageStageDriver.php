@@ -34,6 +34,7 @@ class ImageStageDriver implements RiderStageDriverContract
                 'src' => $src,
                 'alt' => $alt,
                 'presentation' => data_get($payload, 'presentation', data_get($config, 'presentation', 'inline')),
+                'phase' => data_get($payload, 'phase', data_get($config, 'phase')),
             ], fn ($value) => filled($value)),
             meta: (array) data_get($config, 'meta', []),
         );

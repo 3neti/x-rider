@@ -47,6 +47,7 @@ class CtaStageDriver implements RiderStageDriverContract
                 'action' => $action,
                 'url' => $url,
                 'presentation' => $presentation,
+                'phase' => data_get($payload, 'phase', data_get($config, 'phase')),
             ], fn ($value) => filled($value)),
             meta: (array) data_get($config, 'meta', []),
         );
