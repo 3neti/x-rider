@@ -6,14 +6,15 @@ import { useRiderRuntimeActions } from './useRiderRuntimeActions';
 
 type RuntimeTiming = 'on_mount' | 'after_delay' | 'on_complete';
 
-interface Props {
-  stages?: RawRiderStage[];
-  redirectEndpoint?: string | null;
-}
-
-const props = withDefaults(defineProps<Props>(), {
-  stages: () => [],
-  redirectEndpoint: null,
+const props = defineProps({
+  stages: {
+    type: Array as () => RawRiderStage[],
+    default: () => [],
+  },
+  redirectEndpoint: {
+    type: String,
+    default: null,
+  },
 });
 
 const visibleStageKeys = ref<string[]>([]);
@@ -45,8 +46,8 @@ const runtime = useRiderRuntimeActions({
   },
 });
 
-const enabledStages = computed<RawRiderStage[]>(() =>
-    props.stages.filter((stage) => stage.enabled !== false)
+const enabledStages = computed((): RawRiderStage[] =>
+    props.stages.filter((stage: RawRiderStage) => stage.enabled !== false)
 );
 
 function isInitiallyHidden(stage: RawRiderStage): boolean {
@@ -56,10 +57,9 @@ function isInitiallyHidden(stage: RawRiderStage): boolean {
   );
 }
 
-const visibleStages = computed<RawRiderStage[]>(() =>
-    enabledStages.value.filter((stage, index) => {
+const visibleStages = computed((): RawRiderStage[] =>
+    enabledStages.value.filter((stage: RawRiderStage, index: number) => {
       const key = stageKey(stage, index);
-
       return isVisibleByKey(key) || !isInitiallyHidden(stage);
     })
 );
@@ -83,37 +83,52 @@ function markExecuted(key: string): void {
   }
 }
 
-function legacyRedirectAction(stage: RawRiderStage): RiderRuntimeAction | null {
+function legacyRedirectActions(stage: RawRiderStage): RiderRuntimeAction[] {
   if (stage.type !== 'redirect') {
-    return null;
+    return [];
   }
 
   const url = props.redirectEndpoint
       ?? String(stage.payload?.url ?? stage.payload?.redirect_url ?? '');
 
   if (!url) {
-    return null;
+    return [];
   }
 
-  return {
-    key: `${stage.key ?? 'legacy-redirect'}:redirect`,
-    type: 'redirect',
-    timing: 'on_complete',
-    enabled: true,
-    payload: {
-      url,
+  const timeoutSeconds = Number(stage.payload?.timeout ?? stage.timeout ?? 0);
+  const delayMs = timeoutSeconds > 0 ? timeoutSeconds * 1000 : 0;
+
+  return [
+    {
+      key: `${stage.key ?? 'legacy-redirect'}:delay`,
+      type: 'delay',
+      timing: 'on_complete',
+      enabled: delayMs > 0,
+      payload: {
+        delay_ms: delayMs,
+      },
     },
-  };
+    {
+      key: `${stage.key ?? 'legacy-redirect'}:redirect`,
+      type: 'redirect',
+      timing: 'on_complete',
+      enabled: true,
+      payload: {
+        url,
+      },
+    },
+  ];
 }
 
 function actionsForStageAndTiming(
     stage: RawRiderStage,
     timing: RuntimeTiming
 ): RiderRuntimeAction[] {
-  const legacy = legacyRedirectAction(stage);
-  const actions = legacy
-      ? [...(stage.actions ?? []), legacy]
-      : stage.actions;
+  const legacy = legacyRedirectActions(stage);
+  const actions = [
+    ...(stage.actions ?? []),
+    ...legacy,
+  ];
 
   return runtime.actionsForTiming(actions, timing);
 }
@@ -170,12 +185,12 @@ function isBlockingStage(stage: RawRiderStage): boolean {
       || presentationOf(stage) === 'fullscreen';
 }
 
-const inlineStages = computed<RawRiderStage[]>(() =>
-    visibleStages.value.filter((stage) => !isBlockingStage(stage))
+const inlineStages = computed((): RawRiderStage[] =>
+    visibleStages.value.filter((stage: RawRiderStage) => !isBlockingStage(stage))
 );
 
-const blockingStages = computed<RawRiderStage[]>(() =>
-    visibleStages.value.filter((stage) => isBlockingStage(stage))
+const blockingStages = computed((): RawRiderStage[] =>
+    visibleStages.value.filter((stage: RawRiderStage) => isBlockingStage(stage))
 );
 
 const activeBlockingStage = computed<RawRiderStage | null>(() =>

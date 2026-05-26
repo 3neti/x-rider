@@ -49,6 +49,14 @@ const stageContent = computed(() => ({
   content: props.stage.content ?? '',
 }));
 
+const redirectTimeout = computed(() =>
+    Number(props.stage.payload?.timeout ?? props.stage.timeout ?? 0)
+);
+
+const isRedirect = computed(() =>
+    props.stage.type === 'redirect'
+);
+
 const emit = defineEmits(['dismissed']);
 
 function dismiss(): void {
@@ -104,6 +112,22 @@ function dismiss(): void {
         >
           {{ label }}
         </a>
+
+        <div
+            v-if="isRedirect"
+            class="rounded-2xl border bg-card p-5 text-center shadow-sm"
+        >
+          <p class="text-sm font-medium text-foreground">
+            Redirecting you now...
+          </p>
+
+          <p
+              v-if="redirectTimeout > 0"
+              class="mt-1 text-xs text-muted-foreground"
+          >
+            This may take up to {{ redirectTimeout }} seconds.
+          </p>
+        </div>
 
         <button
             v-if="isModal || isFullscreen"
