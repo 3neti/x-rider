@@ -5,39 +5,30 @@ rider:
   stages:
     - type: splash
       key: demo-pre-claim
+      phase: pre_claim
       presentation: inline
       content: |
         PRE-CLAIM DEMO: Please review this before continuing.
       content_type: markdown
       timeout: 3
 
-    # Future:
-    # - type: splash
-    #   key: demo-modal
-    #   presentation: modal
-    #   content: |
-    #     MODAL DEMO: This will render in a modal in a later slice.
-    #
-    # - type: splash
-    #   key: demo-fullscreen
-    #   presentation: fullscreen
-    #   content: |
-    #     FULLSCREEN DEMO: This will render before form-flow in a later slice.
-
     - type: image
       key: demo-image
+      phase: pre_claim
       presentation: inline
-      src: https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1200&auto=format&fit=crop&q=80 #https://placehold.co/600x240?text=x-rider+demo
+      src: https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1200&auto=format&fit=crop&q=80
       alt: x-rider demo banner
 
     - type: link
       key: demo-link
+      phase: pre_claim
       payload:
         label: Learn more
         url: https://example.com
 
     - type: cta
       key: demo-cta
+      phase: pre_claim
       presentation: inline
       payload:
         label: Open Reward
@@ -46,6 +37,7 @@ rider:
 
     - type: splash
       key: demo-modal
+      phase: pre_claim
       presentation: modal
       content: |
         MODAL DEMO: This appears as a dismissible Rider modal.
@@ -54,6 +46,7 @@ rider:
 
     - type: splash
       key: demo-fullscreen
+      phase: pre_claim
       presentation: fullscreen
       content: |
         FULLSCREEN DEMO: This appears as an immersive Rider experience.
@@ -62,12 +55,14 @@ rider:
 
     - type: message
       key: demo-success-message
+      phase: success
       content: |
         SUCCESS DEMO: Thank you for claiming.
       content_type: markdown
 
     - type: redirect
       key: demo-redirect
+      phase: redirect
       payload:
         url: https://example.com/success
         timeout: 8
