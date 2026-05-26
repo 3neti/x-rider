@@ -154,17 +154,55 @@ async function runSequence(): Promise<void> {
 onMounted(() => {
   void runSequence();
 });
+
+const blockingStageIndex = ref(0);
+
+function presentationOf(stage: RawRiderStage): string {
+  return String(
+      stage.payload?.presentation
+      ?? stage.presentation
+      ?? 'inline'
+  ).trim().toLowerCase();
+}
+
+function isBlockingStage(stage: RawRiderStage): boolean {
+  return presentationOf(stage) === 'modal'
+      || presentationOf(stage) === 'fullscreen';
+}
+
+const inlineStages = computed<RawRiderStage[]>(() =>
+    visibleStages.value.filter((stage) => !isBlockingStage(stage))
+);
+
+const blockingStages = computed<RawRiderStage[]>(() =>
+    visibleStages.value.filter((stage) => isBlockingStage(stage))
+);
+
+const activeBlockingStage = computed<RawRiderStage | null>(() =>
+    blockingStages.value[blockingStageIndex.value] ?? null
+);
+
+function advanceBlockingStage(): void {
+  blockingStageIndex.value += 1;
+}
 </script>
 
 <template>
   <div
-      v-if="visibleStages.length"
+      v-if="inlineStages.length"
       class="space-y-3"
   >
     <RiderStagePresenter
-        v-for="(stage, index) in visibleStages"
+        v-for="(stage, index) in inlineStages"
         :key="stage.key ?? `${stage.type}-${index}`"
         :stage="stage"
     />
   </div>
+
+  <RiderStagePresenter
+      v-if="activeBlockingStage"
+      :key="activeBlockingStage.key ?? activeBlockingStage.type"
+      :stage="activeBlockingStage"
+      @dismissed="advanceBlockingStage"
+  />
 </template>

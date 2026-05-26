@@ -7,7 +7,12 @@ interface Props {
   stage: RawRiderStage;
 }
 
-const props = defineProps<Props>();
+const props = defineProps({
+  stage: {
+    type: Object as () => RawRiderStage,
+    required: true,
+  },
+});
 
 const dismissed = ref(false);
 
@@ -44,9 +49,13 @@ const stageContent = computed(() => ({
   content: props.stage.content ?? '',
 }));
 
+const emit = defineEmits(['dismissed']);
+
 function dismiss(): void {
   dismissed.value = true;
+  emit('dismissed');
 }
+
 </script>
 
 <template>
