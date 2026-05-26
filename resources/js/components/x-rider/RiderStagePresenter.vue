@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 import RiderRenderer from './RiderRenderer.vue';
 import type { RawRiderStage } from './types';
 
@@ -49,6 +49,9 @@ const stageContent = computed(() => ({
   content: props.stage.content ?? '',
 }));
 
+const remainingSeconds = ref(0);
+let countdownTimer: number | null = null;
+
 const redirectTimeout = computed(() =>
     Number(props.stage.payload?.timeout ?? props.stage.timeout ?? 0)
 );
@@ -63,6 +66,34 @@ function dismiss(): void {
   dismissed.value = true;
   emit('dismissed');
 }
+
+onMounted(() => {
+  if (props.stage.type !== 'redirect') {
+    return;
+  }
+
+  remainingSeconds.value = redirectTimeout.value;
+
+  if (remainingSeconds.value <= 0) {
+    return;
+  }
+
+  countdownTimer = window.setInterval(() => {
+    remainingSeconds.value -= 1;
+
+    if (remainingSeconds.value <= 0 && countdownTimer !== null) {
+      window.clearInterval(countdownTimer);
+      countdownTimer = null;
+    }
+  }, 1000);
+});
+
+onUnmounted(() => {
+  if (countdownTimer !== null) {
+    window.clearInterval(countdownTimer);
+    countdownTimer = null;
+  }
+});
 
 </script>
 
@@ -125,7 +156,7 @@ function dismiss(): void {
               v-if="redirectTimeout > 0"
               class="mt-1 text-xs text-muted-foreground"
           >
-            This may take up to {{ redirectTimeout }} seconds.
+            Redirecting in {{ Math.max(remainingSeconds, 0) }} seconds.
           </p>
         </div>
 
