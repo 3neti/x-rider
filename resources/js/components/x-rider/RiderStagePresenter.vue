@@ -4,10 +4,6 @@ import RiderRenderer from './RiderRenderer.vue';
 import type { RawRiderStage, RiderRuntimeAction } from './types';
 import { useRiderRuntimeActions } from './useRiderRuntimeActions';
 
-interface Props {
-  stage: RawRiderStage;
-}
-
 const props = defineProps({
   stage: {
     type: Object as () => RawRiderStage,
@@ -121,6 +117,26 @@ onUnmounted(() => {
   }
 });
 
+const copyActions = computed(() =>
+    runtime.actionsForTiming(props.stage.actions, 'on_click')
+        .filter((action) => action.type === 'copy_to_clipboard')
+);
+
+const hasCopyActions = computed(() =>
+    copyActions.value.length > 0
+);
+
+const copyLabel = computed(() =>
+    String(copyActions.value[0]?.payload?.label ?? 'Copy')
+);
+
+async function handleCopyAction(): Promise<void> {
+  if (!hasCopyActions.value) {
+    return;
+  }
+
+  await runtime.executeMany(copyActions.value);
+}
 </script>
 
 <template>
@@ -142,6 +158,15 @@ onUnmounted(() => {
             v-if="stage.content"
             :content="stageContent"
         />
+
+        <button
+            v-else-if="hasCopyActions"
+            type="button"
+            class="inline-flex rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+            @click="handleCopyAction"
+        >
+          {{ copyLabel }}
+        </button>
 
         <img
             v-else-if="stage.type === 'image' && imageSrc"
