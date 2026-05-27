@@ -5,3 +5,8 @@
 .DS_Store
 composer.lock
 __MACOSX/
+/node_modules
+coverage
+coverage-*
+.vitest
+dist
