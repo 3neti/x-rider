@@ -88,7 +88,7 @@ Runtime actions may affect the page experience, but must never affect:
 
 - [x] Update `RiderStagePresenter`
 - [x] Render CTA buttons when stage has `on_click` actions
-- [ ] Support copy buttons
+- [x] Support copy buttons
 - [x] Support external link buttons
 - [x] Support close/dismiss buttons
 - [x] Keep visual rendering separate from action execution
@@ -135,10 +135,10 @@ Runtime actions may affect the page experience, but must never affect:
 
 - [x] Runtime action type tests
 - [x] Stage serialization tests
-- [ ] Action executor tests
-- [ ] Sequencer execution-order tests
-- [ ] Duplicate-execution prevention tests
-- [ ] URL safety tests
+- [x] Action executor tests
+- [x] Sequencer execution-order tests
+- [x] Duplicate-execution prevention tests
+- [x] URL safety tests
 - [x] Backward compatibility tests
 - [x] Runtime action normalization tests
 - [x] Runtime action propagation tests
