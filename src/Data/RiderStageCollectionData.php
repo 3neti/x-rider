@@ -14,22 +14,22 @@ class RiderStageCollectionData extends Data
         public array $meta = [],
     ) {}
 
-    public static function fromArray(array $stages, array $meta = []): self
+    public static function fromArray(array $data): self
     {
+        $stageRows = array_is_list($data)
+            ? $data
+            : ($data['stages'] ?? []);
+
         return new self(
-            stages: collect($stages)
-                ->map(fn (RiderStageData|array $stage): RiderStageData => $stage instanceof RiderStageData
-                    ? $stage
-                    : new RiderStageData(
-                        type: data_get($stage, 'type'),
-                        enabled: (bool) data_get($stage, 'enabled', true),
-                        key: data_get($stage, 'key'),
-                        payload: (array) data_get($stage, 'payload', []),
-                        meta: (array) data_get($stage, 'meta', []),
-                    ))
+            stages: collect($stageRows)
+                ->filter(fn ($stage) => is_array($stage))
+                ->map(fn (array $stage) => RiderStageData::fromArray($stage))
                 ->values()
                 ->all(),
-            meta: $meta,
+
+            meta: array_is_list($data)
+                ? []
+                : (is_array($data['meta'] ?? null) ? $data['meta'] : []),
         );
     }
 

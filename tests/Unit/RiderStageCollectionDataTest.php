@@ -1,5 +1,6 @@
 <?php
 
+use LBHurtado\XRider\Data\RiderRuntimeActionData;
 use LBHurtado\XRider\Data\RiderStageCollectionData;
 use LBHurtado\XRider\Data\RiderStageData;
 use LBHurtado\XRider\Enums\RiderStageType;
@@ -63,4 +64,43 @@ it('finds the first stage of a type', function () {
     ]);
 
     expect($collection->firstOfType('message')?->key)->toBe('message-1');
+});
+
+it('normalizes runtime actions for stages inside a collection', function () {
+    $collection = RiderStageCollectionData::fromArray([
+        'stages' => [
+            [
+                'type' => 'splash',
+                'key' => 'intro',
+                'content' => 'Welcome',
+            ],
+            [
+                'type' => 'cta',
+                'key' => 'open-reward',
+                'payload' => [
+                    'label' => 'Open Reward',
+                    'url' => 'https://example.com/reward',
+                ],
+                'actions' => [
+                    [
+                        'type' => 'open_url',
+                        'timing' => 'on_click',
+                        'requires_user_gesture' => true,
+                        'payload' => [
+                            'url' => 'https://example.com/reward',
+                            'target' => '_blank',
+                        ],
+                    ],
+                ],
+            ],
+        ],
+    ]);
+
+    expect($collection->stages)->toHaveCount(2)
+        ->and($collection->stages[1]->actions)->toHaveCount(1)
+        ->and($collection->stages[1]->actions[0])->toBeInstanceOf(RiderRuntimeActionData::class)
+        ->and($collection->stages[1]->actions[0]->type)->toBe('open_url')
+        ->and($collection->stages[1]->actions[0]->timing)->toBe('on_click')
+        ->and($collection->stages[1]->actions[0]->requires_user_gesture)->toBeTrue()
+        ->and($collection->stages[1]->actions[0]->payload['url'])->toBe('https://example.com/reward');
 });
