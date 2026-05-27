@@ -32,8 +32,15 @@ rider:
       presentation: inline
       payload:
         label: Open Reward
-        action: open_url
         url: https://example.com/reward
+      actions:
+        - key: demo-cta-open
+          type: open_url
+          timing: on_click
+          requires_user_gesture: true
+          payload:
+            url: https://example.com/reward
+            target: _blank
 
     - type: splash
       key: demo-modal

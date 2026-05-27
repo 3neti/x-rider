@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue';
 import RiderRenderer from './RiderRenderer.vue';
-import type { RawRiderStage } from './types';
+import type { RawRiderStage, RiderRuntimeAction } from './types';
+import { useRiderRuntimeActions } from './useRiderRuntimeActions';
 
 interface Props {
   stage: RawRiderStage;
@@ -59,6 +60,31 @@ const redirectTimeout = computed(() =>
 const isRedirect = computed(() =>
     props.stage.type === 'redirect'
 );
+
+const runtime = useRiderRuntimeActions({
+  userGesture: true,
+  onError: (error: unknown, action: RiderRuntimeAction) => {
+    console.warn('[x-rider] click action failed', action, error);
+  },
+});
+
+const clickActions = computed(() =>
+    runtime.actionsForTiming(props.stage.actions, 'on_click')
+);
+
+const hasClickActions = computed(() =>
+    clickActions.value.length > 0
+);
+
+async function handleClickAction(event: Event): Promise<void> {
+  if (!hasClickActions.value) {
+    return;
+  }
+
+  event.preventDefault();
+
+  await runtime.executeMany(clickActions.value);
+}
 
 const emit = defineEmits(['dismissed']);
 
@@ -130,6 +156,7 @@ onUnmounted(() => {
             target="_blank"
             rel="noopener noreferrer"
             class="inline-flex text-sm font-medium text-primary underline"
+            @click="handleClickAction"
         >
           {{ label }}
         </a>
@@ -140,6 +167,7 @@ onUnmounted(() => {
             target="_blank"
             rel="noopener noreferrer"
             class="inline-flex rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+            @click="handleClickAction"
         >
           {{ label }}
         </a>
