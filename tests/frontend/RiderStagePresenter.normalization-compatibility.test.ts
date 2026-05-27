@@ -35,7 +35,7 @@ describe('RiderStagePresenter normalization compatibility', () => {
         expect(wrapper.text()).toContain('Payload content');
     });
 
-    it('renders normalized payload html content', () => {
+    it('renders sanitized normalized payload html content', () => {
         const wrapper = mount(RiderStagePresenter, {
             props: {
                 stage: {
@@ -44,6 +44,9 @@ describe('RiderStagePresenter normalization compatibility', () => {
                     payload: {
                         content_type: 'html',
                         content: '<div><h2>Für Anaïs</h2><p>cushla machree</p></div>',
+                    },
+                    meta: {
+                        sanitized: true,
                     },
                 },
             },

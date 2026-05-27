@@ -52,6 +52,10 @@ const stageContent = computed(() => ({
       ?? props.stage.payload?.content
       ?? ''
   ),
+  meta: {
+    ...(props.stage.payload?.meta ?? {}),
+    ...(props.stage.meta ?? {}),
+  },
 }));
 
 const remainingSeconds = ref(0);
