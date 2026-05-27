@@ -12,13 +12,6 @@ rider:
       content_type: markdown
       timeout: 3
 
-    - type: image
-      key: demo-image
-      phase: pre_claim
-      presentation: inline
-      src: https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1200&auto=format&fit=crop&q=80
-      alt: x-rider demo banner
-
     - type: link
       key: demo-link
       phase: pre_claim
@@ -52,13 +45,38 @@ rider:
       timeout: 3
 
     - type: splash
-      key: demo-fullscreen
+      key: anais-splash
       phase: pre_claim
       presentation: fullscreen
+      content_type: html
       content: |
-        FULLSCREEN DEMO: This appears as an immersive Rider experience.
-      content_type: markdown
-      timeout: 3
+        <div class="text-center">
+          <img
+            src="https://cataas.com/cat?width=600&height=400"
+            alt="Cat"
+            class="mx-auto rounded-lg shadow-lg mb-4"
+            style="max-width: 500px;"
+          />
+
+          <h2 class="text-2xl font-bold mb-2">
+            Für Anaïs
+          </h2>
+
+          <p class="text-lg">
+            Dans une autre vie, sinon dans celle-ci,
+            <span class="font-mono font-bold text-red-500">
+              cushla machree
+            </span>
+
+            <span class="font-mono">
+              -
+            </span>
+
+            <span class="font-mono font-bold text-green-600">
+              :wq!
+            </span>
+          </p>
+        </div>
 
     - type: message
       key: demo-success-message

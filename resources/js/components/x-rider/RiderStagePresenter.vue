@@ -42,8 +42,16 @@ const imageAlt = computed(() =>
 
 const stageContent = computed(() => ({
   enabled: props.stage.enabled !== false,
-  type: props.stage.content_type ?? 'markdown',
-  content: props.stage.content ?? '',
+  type: String(
+      props.stage.content_type
+      ?? props.stage.payload?.content_type
+      ?? 'markdown'
+  ),
+  content: String(
+      props.stage.content
+      ?? props.stage.payload?.content
+      ?? ''
+  ),
 }));
 
 const remainingSeconds = ref(0);
@@ -155,7 +163,7 @@ async function handleCopyAction(): Promise<void> {
                 }"
       >
         <RiderRenderer
-            v-if="stage.content && !isRedirect"
+            v-if="stageContent.content && !isRedirect"
             :content="stageContent"
         />
 
@@ -202,7 +210,7 @@ async function handleCopyAction(): Promise<void> {
             class="rounded-2xl border bg-card p-5 text-center shadow-sm"
         >
           <RiderRenderer
-              v-if="stage.content"
+              v-if="stageContent.content"
               :content="stageContent"
           />
 
