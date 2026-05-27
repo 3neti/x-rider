@@ -155,7 +155,7 @@ async function handleCopyAction(): Promise<void> {
                 }"
       >
         <RiderRenderer
-            v-if="stage.content"
+            v-if="stage.content && !isRedirect"
             :content="stageContent"
         />
 
@@ -201,7 +201,15 @@ async function handleCopyAction(): Promise<void> {
             v-if="isRedirect"
             class="rounded-2xl border bg-card p-5 text-center shadow-sm"
         >
-          <p class="text-sm font-medium text-foreground">
+          <RiderRenderer
+              v-if="stage.content"
+              :content="stageContent"
+          />
+
+          <p
+              v-else
+              class="text-sm font-medium text-foreground"
+          >
             Redirecting you now...
           </p>
 

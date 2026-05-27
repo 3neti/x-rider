@@ -151,7 +151,7 @@ Runtime actions may affect the page experience, but must never affect:
 - [x] Claim preview renders pre-claim/runtime stages
 - [x] Success page renders success/post-claim stages
 - [x] Success page does not render pre-claim stages
-- [ ] Success page executes redirect runtime stages
+- [x] Success page executes redirect runtime stages
 - [x] Legacy rider redirect still works
 - [x] Lifecycle isolation tests
 - [x] Lifecycle phase policy extraction
@@ -247,25 +247,6 @@ git commit -m "Document rider runtime actions"
 - [x] x-rider owns action semantics
 - [x] Tests prove lifecycle isolation
 - [x] Docs explain how to add new runtime actions
-
----
-
-# Remaining High-Value Work
-
-## Runtime frontend tests
-
-Still needed:
-
-- executor tests
-- sequencing-order tests
-- duplicate-execution tests
-- URL safety tests
-
-See:
-
-```text
-docs/todo/runtime_frontend_tests.md
-```
 
 ---
 
