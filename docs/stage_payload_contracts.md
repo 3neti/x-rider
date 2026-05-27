@@ -55,6 +55,7 @@ Normalized stages SHOULD conform to:
   key: welcome-stage
   enabled: true
   presentation: inline
+
   payload:
     content: Welcome.
 ```
@@ -69,10 +70,54 @@ Normalized runtime structure:
 interface RiderStage {
     type: string;
     enabled: boolean;
+
     key?: string | null;
+
+    phase?: string | null;
+
     presentation?: string | null;
+
     payload?: Record<string, unknown>;
+
+    actions?: RiderRuntimeAction[];
+
     meta?: Record<string, unknown>;
+
+    content?: string | null;
+    content_type?: string | null;
+}
+```
+
+---
+
+## Runtime Action Shape
+
+```ts
+interface RiderRuntimeAction {
+    key?: string;
+
+    type:
+        | 'redirect'
+        | 'open_url'
+        | 'copy_to_clipboard'
+        | 'track_event'
+        | 'delay'
+        | 'show_stage'
+        | 'close';
+
+    timing?:
+        | 'on_mount'
+        | 'on_click'
+        | 'after_delay'
+        | 'on_complete';
+
+    enabled?: boolean;
+
+    requires_user_gesture?: boolean;
+
+    external?: boolean;
+
+    payload?: Record<string, unknown>;
 }
 ```
 
@@ -84,10 +129,44 @@ interface RiderStage {
 |---|---|
 | type | semantic stage identifier |
 | enabled | runtime activation |
-| key | stable identifier |
-| presentation | rendering intent |
+| key | stable runtime identity |
+| phase | lifecycle placement |
+| presentation | rendering/runtime mode |
 | payload | stage-specific content |
+| actions | runtime behavior list |
 | meta | runtime metadata |
+| content | normalized textual shortcut |
+| content_type | normalized rendering hint |
+
+---
+
+## Lifecycle Phases
+
+Supported phases currently include:
+
+| Phase | Purpose |
+|---|---|
+| `pre_claim` | preview/onboarding runtime |
+| `runtime` | active runtime before form-flow |
+| `success` | redemption success runtime |
+| `post_claim` | post-redemption experience |
+| `redirect` | redirect runtime orchestration |
+
+Lifecycle semantics are intentionally isolated.
+
+---
+
+## Presentation Modes
+
+Supported presentation modes currently include:
+
+| Mode | Purpose |
+|---|---|
+| `inline` | render inside page flow |
+| `modal` | blocking dismissible overlay |
+| `fullscreen` | immersive runtime surface |
+
+Blocking presentations are sequenced one at a time by the runtime sequencer.
 
 ---
 
@@ -114,17 +193,13 @@ Payloads SHOULD NOT contain:
 
 # Supported Stage Types
 
----
+## 1. splash
 
-# 1. splash
-
-## Purpose
+### Purpose
 
 Rich textual or introductory experience surface.
 
----
-
-## Canonical Payload
+### Canonical Payload
 
 ```yaml
 payload:
@@ -133,9 +208,7 @@ payload:
   timeout: 3
 ```
 
----
-
-## Payload Fields
+### Payload Fields
 
 | Field | Type | Purpose |
 |---|---|---|
@@ -143,13 +216,12 @@ payload:
 | content_type | string | rendering hint |
 | timeout | int | optional display duration |
 
----
-
-## Example
+### Example
 
 ```yaml
 - type: splash
   presentation: fullscreen
+
   payload:
     content: |
       Welcome to the rewards experience.
@@ -159,15 +231,13 @@ payload:
 
 ---
 
-# 2. message
+## 2. message
 
-## Purpose
+### Purpose
 
 Simple informational text.
 
----
-
-## Canonical Payload
+### Canonical Payload
 
 ```yaml
 payload:
@@ -175,27 +245,24 @@ payload:
   content_type: text
 ```
 
----
-
-## Example
+### Example
 
 ```yaml
 - type: message
+
   payload:
     content: Thank you for claiming.
 ```
 
 ---
 
-# 3. image
+## 3. image
 
-## Purpose
+### Purpose
 
 Display image/media content.
 
----
-
-## Canonical Payload
+### Canonical Payload
 
 ```yaml
 payload:
@@ -203,22 +270,19 @@ payload:
   alt: Promotional banner
 ```
 
----
-
-## Payload Fields
+### Payload Fields
 
 | Field | Type | Purpose |
 |---|---|---|
 | src | string | image source |
 | alt | string | accessibility text |
 
----
-
-## Example
+### Example
 
 ```yaml
 - type: image
   presentation: inline
+
   payload:
     src: https://placehold.co/1200x400
     alt: Campaign banner
@@ -226,15 +290,13 @@ payload:
 
 ---
 
-# 4. link
+## 4. link
 
-## Purpose
+### Purpose
 
 Interactive external or internal navigation.
 
----
-
-## Canonical Payload
+### Canonical Payload
 
 ```yaml
 payload:
@@ -242,21 +304,18 @@ payload:
   url: https://example.com
 ```
 
----
-
-## Payload Fields
+### Payload Fields
 
 | Field | Type | Purpose |
 |---|---|---|
 | label | string | display text |
 | url | string | target destination |
 
----
-
-## Example
+### Example
 
 ```yaml
 - type: link
+
   payload:
     label: Learn more
     url: https://example.com
@@ -264,51 +323,135 @@ payload:
 
 ---
 
-# 5. redirect
+## 5. redirect
 
-## Purpose
+### Purpose
 
 Runtime redirect orchestration.
 
----
+Redirect stages are runtime-driven.
 
-## Canonical Payload
+Claim preview surfaces must never execute redirect runtime.
+
+### Canonical Payload
 
 ```yaml
 payload:
   url: https://merchant.example.com
   timeout: 5
   fallback_url: /x/claim
+  external: true
 ```
 
----
-
-## Payload Fields
+### Payload Fields
 
 | Field | Type | Purpose |
 |---|---|---|
 | url | string | redirect destination |
 | timeout | int | delay before redirect |
 | fallback_url | string | fallback runtime route |
+| external | bool | external runtime hint |
 
----
-
-## Example
+### Example
 
 ```yaml
 - type: redirect
+  phase: redirect
+
   payload:
     url: https://merchant.example.com
     timeout: 5
+    external: true
 ```
+
+### Runtime Behavior
+
+Redirect stages are internally normalized into runtime actions.
+
+Example runtime behavior:
+
+```text
+delay → redirect
+```
+
+Redirect countdown rendering belongs to the frontend runtime sequencer.
+
+---
+
+# Runtime Action Support
+
+Stages may declare runtime actions.
+
+Example:
+
+```yaml
+- type: cta
+  key: reward-cta
+  phase: pre_claim
+  presentation: inline
+
+  payload:
+    label: Open Reward
+    url: https://example.com/reward
+
+  actions:
+    - type: open_url
+      timing: on_click
+      requires_user_gesture: true
+
+      payload:
+        url: https://example.com/reward
+        target: _blank
+```
+
+---
+
+## Runtime Action Principle
+
+Stages describe:
+
+```text
+what the user sees
+```
+
+Runtime actions describe:
+
+```text
+what the runtime does
+```
+
+This distinction is foundational.
+
+---
+
+## Supported Runtime Actions
+
+| Action | Purpose |
+|---|---|
+| redirect | navigate current window |
+| open_url | open external/internal URL |
+| copy_to_clipboard | copy text |
+| track_event | emit analytics/runtime event |
+| delay | pause runtime sequence |
+| show_stage | reveal hidden stage |
+| close | dismiss runtime surface |
+
+---
+
+## Supported Timings
+
+| Timing | Meaning |
+|---|---|
+| on_mount | execute when stage enters runtime |
+| on_click | execute from user interaction |
+| after_delay | execute after runtime delay |
+| on_complete | execute after stage completion |
 
 ---
 
 # Runtime Normalization Rules
 
----
-
-# Raw YAML MAY Be Short Form
+## Raw YAML MAY Be Short Form
 
 Example:
 
@@ -326,7 +469,7 @@ payload:
 
 ---
 
-# Legacy Fields
+## Legacy Fields
 
 The runtime MAY normalize legacy fields into payloads.
 
@@ -346,7 +489,7 @@ payload:
 
 ---
 
-# Frontend Runtime Guarantee
+## Frontend Runtime Guarantee
 
 Frontend runtimes SHOULD assume:
 
@@ -358,7 +501,7 @@ and SHOULD avoid depending on raw YAML shortcuts.
 
 ---
 
-# Unknown Payload Fields
+## Unknown Payload Fields
 
 Unknown payload fields SHOULD:
 
@@ -368,13 +511,12 @@ Unknown payload fields SHOULD:
 
 This allows forward compatibility.
 
----
-
-# Example
+### Example
 
 ```yaml
 payload:
   sponsor_id: abc123
+
   analytics:
     campaign: summer
 ```
@@ -383,11 +525,57 @@ SHOULD survive normalization unchanged.
 
 ---
 
-# Meta vs Payload
+# Runtime Action Normalization
+
+Runtime actions normalize invalid values safely.
 
 ---
 
-# payload
+## Invalid Action Types
+
+Unknown action types normalize into:
+
+```text
+track_event
+```
+
+---
+
+## Invalid Timings
+
+Unknown timings normalize into:
+
+```text
+on_click
+```
+
+---
+
+## Invalid Delays
+
+Negative delays normalize into:
+
+```text
+0
+```
+
+---
+
+## Disabled Actions
+
+Actions with:
+
+```yaml
+enabled: false
+```
+
+must never execute.
+
+---
+
+# Meta vs Payload
+
+## payload
 
 Represents:
 
@@ -403,7 +591,7 @@ Examples:
 
 ---
 
-# meta
+## meta
 
 Represents:
 
@@ -418,9 +606,7 @@ Examples:
 - runtime annotations
 - analytics hints
 
----
-
-# Example
+### Example
 
 ```yaml
 payload:
@@ -463,18 +649,33 @@ Supported content types currently include:
 
 ---
 
-# Runtime Rendering Responsibility
+# Runtime Responsibility Boundary
 
 x-rider defines:
 
 ```text
 payload semantics
+runtime semantics
+lifecycle semantics
+runtime action semantics
 ```
 
 Frontend runtimes define:
 
 ```text
-how payloads render visually
+visual rendering
+animations
+accessibility
+interaction UX
+presentation implementation
+```
+
+x-change defines:
+
+```text
+lifecycle orchestration
+phase projection
+runtime payload transport
 ```
 
 This separation is intentional.
@@ -483,9 +684,7 @@ This separation is intentional.
 
 # Runtime Fallback Rules
 
----
-
-# Unknown Stage Types
+## Unknown Stage Types
 
 Unknown types SHOULD:
 
@@ -495,7 +694,7 @@ Unknown types SHOULD:
 
 ---
 
-# Missing Payloads
+## Missing Payloads
 
 Stages without payloads SHOULD:
 
@@ -523,9 +722,9 @@ Frontend runtimes SHOULD:
 
 ---
 
-# Future Stage Types
+# Future Runtime Evolution
 
-Planned future stage types may include:
+Planned future runtime features may include:
 
 ```yaml
 - type: video
@@ -534,8 +733,18 @@ Planned future stage types may include:
 - type: poll
 - type: carousel
 - type: sponsor
-- type: action
 ```
+
+Future runtime capabilities may include:
+
+- runtime analytics transport
+- sponsor runtime orchestration
+- runtime persistence
+- cross-device runtime continuity
+- runtime replay
+- mobile-native runtimes
+- kiosk runtimes
+- multi-client runtime protocols
 
 The payload contract system is intentionally extensible.
 
@@ -555,6 +764,25 @@ Frontend runtimes own:
 - animations
 - accessibility
 - interaction behavior
+
+---
+
+# Lifecycle Isolation Guarantee
+
+Lifecycle phases are intentionally isolated.
+
+| Surface | Allowed Phases |
+|---|---|
+| Claim Preview | `pre_claim`, `runtime` |
+| Success Runtime | `success`, `post_claim`, `redirect` |
+
+This prevents:
+
+- redirect leakage into preview runtime
+- pre-claim replay after redemption
+- runtime execution at incorrect lifecycle stages
+
+These guarantees are formally tested.
 
 ---
 
