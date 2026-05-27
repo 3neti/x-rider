@@ -104,3 +104,41 @@ it('normalizes runtime actions for stages inside a collection', function () {
         ->and($collection->stages[1]->actions[0]->requires_user_gesture)->toBeTrue()
         ->and($collection->stages[1]->actions[0]->payload['url'])->toBe('https://example.com/reward');
 });
+
+it('carries normalized runtime actions through stage collections', function () {
+    $collection = RiderStageCollectionData::fromArray([
+        'stages' => [
+            [
+                'type' => 'cta',
+                'key' => 'demo-cta',
+                'actions' => [
+                    [
+                        'type' => 'open_url',
+                        'timing' => 'on_click',
+                        'payload' => [
+                            'url' => 'https://example.com/reward',
+                        ],
+                    ],
+                ],
+            ],
+        ],
+        'meta' => [
+            'source' => 'test',
+        ],
+    ]);
+
+    expect($collection->stages)->toHaveCount(1)
+        ->and($collection->meta)->toBe(['source' => 'test'])
+        ->and($collection->stages[0]->normalizedType())->toBe('cta')
+        ->and($collection->stages[0]->key)->toBe('demo-cta')
+        ->and($collection->stages[0]->actions)->toHaveCount(1)
+        ->and($collection->stages[0]->actions[0])->toBeInstanceOf(RiderRuntimeActionData::class)
+        ->and($collection->stages[0]->actions[0]->type)->toBe('open_url')
+        ->and($collection->stages[0]->actions[0]->timing)->toBe('on_click')
+        ->and($collection->stages[0]->actions[0]->payload)->toMatchArray([
+            'url' => 'https://example.com/reward',
+            'target' => '_blank',
+            'label' => null,
+            'meta' => [],
+        ]);
+});

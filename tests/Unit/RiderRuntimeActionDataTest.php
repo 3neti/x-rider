@@ -131,3 +131,30 @@ it('marks disabled actions as not executable', function () {
     expect($action->enabled)->toBeFalse()
         ->and($action->isExecutable())->toBeFalse();
 });
+
+it('serializes normalized runtime action payloads', function () {
+    $action = RiderRuntimeActionData::fromArray([
+        'type' => 'open_url',
+        'key' => 'open-reward',
+        'timing' => 'on_click',
+        'requires_user_gesture' => true,
+        'external' => true,
+        'payload' => [
+            'url' => 'https://example.com/reward',
+            'target' => '_blank',
+        ],
+    ]);
+
+    expect($action->type)->toBe('open_url')
+        ->and($action->key)->toBe('open-reward')
+        ->and($action->timing)->toBe('on_click')
+        ->and($action->enabled)->toBeTrue()
+        ->and($action->requires_user_gesture)->toBeTrue()
+        ->and($action->external)->toBeTrue()
+        ->and($action->payload)->toMatchArray([
+            'url' => 'https://example.com/reward',
+            'target' => '_blank',
+            'label' => null,
+            'meta' => [],
+        ]);
+});
