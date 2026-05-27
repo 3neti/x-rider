@@ -307,3 +307,67 @@ it('keeps legacy pre claim precedence over splash stages', function () {
     expect($experience->preClaim)->not->toBeNull()
         ->and($experience->preClaim?->content)->toBe('Legacy pre-claim wins.');
 });
+
+it('propagates sanitized legacy splash metadata into rider pre claim content', function () {
+    config()->set('x-rider.package_drivers_path', __DIR__.'/../../resources/rider-drivers');
+
+    $resolver = new DefaultRiderExperienceResolver(
+        campaigns: xRiderCampaignStub(),
+        drivers: new RiderDriverLoader(new Filesystem),
+        stages: app(\LBHurtado\XRider\Contracts\RiderStageResolverContract::class),
+    );
+
+    $experience = $resolver->resolve(xRiderTestSubject(), [
+        'rider' => [
+            'splash' => '<strong>Hello</strong>',
+            'splash_timeout' => 3,
+            'splash_meta' => [
+                'sanitized' => true,
+                'html_profile' => 'rider_splash',
+            ],
+        ],
+    ]);
+
+    expect($experience->preClaim)->not->toBeNull()
+        ->and($experience->preClaim?->content)->toBe('<strong>Hello</strong>')
+        ->and($experience->preClaim?->normalizedType())->toBe('html')
+        ->and($experience->preClaim?->meta)->toMatchArray([
+            'source' => 'stage',
+            'stage_key' => 'legacy-splash',
+            'timeout' => 3,
+            'sanitized' => true,
+            'html_profile' => 'rider_splash',
+        ]);
+});
+
+it('propagates sanitized legacy splash metadata into resolved splash stage', function () {
+    config()->set('x-rider.package_drivers_path', __DIR__.'/../../resources/rider-drivers');
+
+    $resolver = new DefaultRiderExperienceResolver(
+        campaigns: xRiderCampaignStub(),
+        drivers: new RiderDriverLoader(new Filesystem),
+        stages: app(\LBHurtado\XRider\Contracts\RiderStageResolverContract::class),
+    );
+
+    $experience = $resolver->resolve(xRiderTestSubject(), [
+        'rider' => [
+            'splash' => '<strong>Hello</strong>',
+            'splash_timeout' => 3,
+            'splash_meta' => [
+                'sanitized' => true,
+                'html_profile' => 'rider_splash',
+            ],
+        ],
+    ]);
+
+    $splashStage = collect($experience->stages?->stages ?? [])
+        ->first(fn ($stage) => $stage->key === 'legacy-splash');
+
+    expect($splashStage)->not->toBeNull()
+        ->and($splashStage?->payload['content'])->toBe('<strong>Hello</strong>')
+        ->and($splashStage?->payload['content_type'])->toBe('html')
+        ->and($splashStage?->meta)->toMatchArray([
+            'sanitized' => true,
+            'html_profile' => 'rider_splash',
+        ]);
+});

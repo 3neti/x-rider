@@ -48,6 +48,8 @@ rider:
       key: anais-splash
       phase: pre_claim
       presentation: fullscreen
+      meta:
+        trusted_html: true
       content_type: html
       content: |
         <div class="text-center">

@@ -209,11 +209,14 @@ class DefaultRiderExperienceResolver implements RiderExperienceResolverContract
             enabled: $splashStage?->enabled ?? true,
             type: $type,
             content: $content,
-            meta: array_filter([
-                'source' => 'stage',
-                'stage_key' => $splashStage?->key,
-                'timeout' => data_get($splashStage?->payload ?? [], 'timeout'),
-            ], fn ($value) => filled($value)),
+            meta: array_filter(array_replace_recursive(
+                is_array($splashStage?->meta ?? null) ? $splashStage->meta : [],
+                [
+                    'source' => 'stage',
+                    'stage_key' => $splashStage?->key,
+                    'timeout' => data_get($splashStage?->payload ?? [], 'timeout'),
+                ],
+            ), fn ($value) => filled($value)),
         );
     }
 }
