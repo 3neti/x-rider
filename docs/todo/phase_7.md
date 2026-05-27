@@ -14,156 +14,170 @@ Runtime actions may affect the page experience, but must never affect:
 
 ---
 
-## Phase 7.1 — Define Runtime Action Contract
+# Phase 7.1 — Define Runtime Action Contract
 
-- [ ] Add `RiderRuntimeAction` type in `x-rider` frontend types
-- [ ] Define supported action names:
-    - [ ] `redirect`
-    - [ ] `open_url`
-    - [ ] `copy_to_clipboard`
-    - [ ] `track_event`
-    - [ ] `delay`
-    - [ ] `show_stage`
-    - [ ] `close`
-- [ ] Add action payload typing
-- [ ] Add action timing metadata:
-    - [ ] `on_mount`
-    - [ ] `on_click`
-    - [ ] `after_delay`
-    - [ ] `on_complete`
-- [ ] Add safety flags:
-    - [ ] `requires_user_gesture`
-    - [ ] `external`
-    - [ ] `enabled`
-
----
-
-## Phase 7.2 — Extend Stage Payload Shape
-
-- [ ] Allow stages to declare `actions`
-- [ ] Keep backward compatibility with existing stage payloads
-- [ ] Ensure old `redirect` stages still work
-- [ ] Ensure visual-only stages remain valid
-- [ ] Add examples for:
-    - [ ] splash with delayed redirect
-    - [ ] message with CTA open URL
-    - [ ] success stage with copy action
-    - [ ] redirect stage with countdown
+- [x] Add `RiderRuntimeAction` type in `x-rider` frontend types
+- [x] Define supported action names:
+  - [x] `redirect`
+  - [x] `open_url`
+  - [x] `copy_to_clipboard`
+  - [x] `track_event`
+  - [x] `delay`
+  - [x] `show_stage`
+  - [x] `close`
+- [x] Add action payload typing
+- [x] Add action timing metadata:
+  - [x] `on_mount`
+  - [x] `on_click`
+  - [x] `after_delay`
+  - [x] `on_complete`
+- [x] Add safety flags:
+  - [x] `requires_user_gesture`
+  - [x] `external`
+  - [x] `enabled`
 
 ---
 
-## Phase 7.3 — Build Runtime Action Executor
+# Phase 7.2 — Extend Stage Payload Shape
 
-- [ ] Create `useRiderRuntimeActions.ts`
-- [ ] Implement safe executor registry
-- [ ] Implement `redirect`
-- [ ] Implement `open_url`
-- [ ] Implement `copy_to_clipboard`
-- [ ] Implement `track_event` as no-op/log seam first
-- [ ] Implement `delay`
-- [ ] Implement `show_stage`
-- [ ] Implement `close`
-- [ ] Add guard for disabled actions
-- [ ] Add guard for unsafe external URLs
-- [ ] Add guard for user-gesture-only actions
+- [x] Allow stages to declare `actions`
+- [x] Keep backward compatibility with existing stage payloads
+- [x] Ensure old `redirect` stages still work
+- [x] Ensure visual-only stages remain valid
+- [x] Add examples for:
+  - [x] splash with delayed redirect
+  - [x] message with CTA open URL
+  - [ ] success stage with copy action
+  - [x] redirect stage with countdown
 
 ---
 
-## Phase 7.4 — Upgrade RiderRuntimeSequencer
+# Phase 7.3 — Build Runtime Action Executor
 
-- [ ] Accept stages with runtime actions
-- [ ] Execute `on_mount` actions safely
-- [ ] Execute `after_delay` actions safely
-- [ ] Expose `on_complete` behavior
-- [ ] Preserve current redirect countdown behavior
-- [ ] Prevent duplicate execution on re-render
-- [ ] Track executed action keys locally
-- [ ] Add fallback behavior when action fails
+- [x] Create `useRiderRuntimeActions.ts`
+- [x] Implement safe executor registry
+- [x] Implement `redirect`
+- [x] Implement `open_url`
+- [x] Implement `copy_to_clipboard`
+- [x] Implement `track_event` as no-op/log seam first
+- [x] Implement `delay`
+- [x] Implement `show_stage`
+- [x] Implement `close`
+- [x] Add guard for disabled actions
+- [x] Add guard for unsafe external URLs
+- [x] Add guard for user-gesture-only actions
 
 ---
 
-## Phase 7.5 — Add Action-Aware Presenter Support
+# Phase 7.4 — Upgrade RiderRuntimeSequencer
 
-- [ ] Update `RiderStagePresenter`
-- [ ] Render CTA buttons when stage has `on_click` actions
+- [x] Accept stages with runtime actions
+- [x] Execute `on_mount` actions safely
+- [x] Execute `after_delay` actions safely
+- [x] Expose `on_complete` behavior
+- [x] Preserve current redirect countdown behavior
+- [x] Prevent duplicate execution on re-render
+- [x] Track executed action keys locally
+- [x] Add fallback behavior when action fails
+- [x] Sequence blocking modal/fullscreen stages
+- [x] Restore modal/fullscreen runtime presentations
+
+---
+
+# Phase 7.5 — Add Action-Aware Presenter Support
+
+- [x] Update `RiderStagePresenter`
+- [x] Render CTA buttons when stage has `on_click` actions
 - [ ] Support copy buttons
-- [ ] Support external link buttons
-- [ ] Support close/dismiss buttons
-- [ ] Keep visual rendering separate from action execution
-- [ ] Do not execute actions from plain visual render
+- [x] Support external link buttons
+- [x] Support close/dismiss buttons
+- [x] Keep visual rendering separate from action execution
+- [x] Do not execute actions from plain visual render
+- [x] Support runtime redirect countdown rendering
 
 ---
 
-## Phase 7.6 — Normalize Backend DTO / PHP Data Shape
+# Phase 7.6 — Normalize Backend DTO / PHP Data Shape
 
-- [ ] Add runtime action DTO in `x-rider`
-- [ ] Add action collection to stage DTO
-- [ ] Preserve old stage serialization
+- [x] Add runtime action DTO in `x-rider`
+- [x] Add action collection to stage DTO
+- [x] Preserve old stage serialization
 - [ ] Add validation rules for action payloads
-- [ ] Add safe defaults
-- [ ] Ensure x-change only transports action payloads
-- [ ] Ensure x-change does not interpret runtime action semantics
+- [x] Add safe defaults
+- [x] Ensure x-change only transports action payloads
+- [x] Ensure x-change does not interpret runtime action semantics
+- [x] Normalize runtime action collections through stage collections
 
 ---
 
-## Phase 7.7 — Update x-change Integration
+# Phase 7.7 — Update x-change Integration
 
-- [ ] Confirm `ClaimWidget.vue` still only renders:
-    - [ ] `pre_claim`
-    - [ ] `runtime`
-- [ ] Confirm `ClaimWidget.vue` still does not execute:
-    - [ ] `redirect`
-- [ ] Confirm `Success.vue` still only renders:
-    - [ ] `success`
-    - [ ] `post_claim`
-    - [ ] `redirect`
-- [ ] Confirm `Success.vue` does not render:
-    - [ ] `pre_claim`
-- [ ] Wire action-aware sequencer into success redirect runtime
-- [ ] Keep legacy `RiderCountdown` fallback
+- [x] Confirm `ClaimWidget.vue` still only renders:
+  - [x] `pre_claim`
+  - [x] `runtime`
+- [x] Confirm `ClaimWidget.vue` still does not execute:
+  - [x] `redirect`
+- [x] Confirm `Success.vue` still only renders:
+  - [x] `success`
+  - [x] `post_claim`
+  - [x] `redirect`
+- [x] Confirm `Success.vue` does not render:
+  - [x] `pre_claim`
+- [x] Wire action-aware sequencer into success redirect runtime
+- [x] Keep legacy `RiderCountdown` fallback
+- [x] Restore modal/fullscreen runtime sequencing
 
 ---
 
-## Phase 7.8 — Tests
+# Phase 7.8 — Tests
 
-### x-rider tests
+## x-rider tests
 
-- [ ] Runtime action type tests
-- [ ] Stage serialization tests
+- [x] Runtime action type tests
+- [x] Stage serialization tests
 - [ ] Action executor tests
 - [ ] Sequencer execution-order tests
 - [ ] Duplicate-execution prevention tests
 - [ ] URL safety tests
-- [ ] Backward compatibility tests
+- [x] Backward compatibility tests
+- [x] Runtime action normalization tests
+- [x] Runtime action propagation tests
 
-### x-change tests
+---
 
-- [ ] Claim preview does not execute redirect actions
-- [ ] Claim preview renders pre-claim/runtime stages
-- [ ] Success page renders success/post-claim stages
+## x-change tests
+
+- [x] Claim preview does not execute redirect actions
+- [x] Claim preview renders pre-claim/runtime stages
+- [x] Success page renders success/post-claim stages
+- [x] Success page does not render pre-claim stages
 - [ ] Success page executes redirect runtime stages
-- [ ] Success page does not render pre-claim stages
-- [ ] Legacy rider redirect still works
+- [x] Legacy rider redirect still works
+- [x] Lifecycle isolation tests
+- [x] Lifecycle phase policy extraction
 
 ---
 
-## Phase 7.9 — Documentation
+# Phase 7.9 — Documentation
 
-- [ ] Add `x-rider/docs/runtime_actions.md`
-- [ ] Add action payload examples
-- [ ] Add safety rules
-- [ ] Add lifecycle placement rules
-- [ ] Update `stage_payload_contracts.md`
-- [ ] Update `preview_runtime.md`
+- [x] Add `x-rider/docs/runtime_actions.md`
+- [x] Add action payload examples
+- [x] Add safety rules
+- [x] Add lifecycle placement rules
+- [x] Update `stage_payload_contracts.md`
+- [x] Update `preview_runtime.md`
 - [ ] Update package boundary docs if needed
+- [x] Document lifecycle isolation guarantees
+- [x] Document runtime responsibility boundaries
+- [x] Document runtime action normalization behavior
 
 ---
 
-## Phase 7.10 — Commit Structure
+# Phase 7.10 — Commit Structure
 
-### Commit 1
+## Commit 1
 
-- [ ] Runtime action types and DTOs
+- [x] Runtime action types and DTOs
 
 Suggested message:
 
@@ -171,9 +185,11 @@ Suggested message:
 git commit -m "Add rider runtime action contract"
 ```
 
-### Commit 2
+---
 
-- [ ] Frontend runtime executor and sequencer upgrade
+## Commit 2
+
+- [x] Frontend runtime executor and sequencer upgrade
 
 Suggested message:
 
@@ -181,9 +197,11 @@ Suggested message:
 git commit -m "Implement rider runtime action executor"
 ```
 
-### Commit 3
+---
 
-- [ ] Presenter CTA support
+## Commit 3
+
+- [x] Presenter CTA support
 
 Suggested message:
 
@@ -191,9 +209,11 @@ Suggested message:
 git commit -m "Add action-aware rider stage presentation"
 ```
 
-### Commit 4
+---
 
-- [ ] x-change lifecycle integration tests
+## Commit 4
+
+- [x] x-change lifecycle integration tests
 
 Suggested message:
 
@@ -201,9 +221,11 @@ Suggested message:
 git commit -m "Verify rider runtime actions across claim lifecycle"
 ```
 
-### Commit 5
+---
 
-- [ ] Documentation
+## Commit 5
+
+- [x] Documentation
 
 Suggested message:
 
@@ -213,15 +235,60 @@ git commit -m "Document rider runtime actions"
 
 ---
 
-## Phase 7 Done Criteria
+# Phase 7 Done Criteria
 
-- [ ] Runtime actions are typed
-- [ ] Runtime actions are safely executable
-- [ ] Redirect behavior is action-driven where possible
-- [ ] Legacy redirect behavior still works
-- [ ] Claim preview cannot accidentally execute redirect actions
-- [ ] Success page owns post-claim and redirect runtime behavior
-- [ ] x-change transports rider runtime payloads without owning semantics
-- [ ] x-rider owns action semantics
-- [ ] Tests prove lifecycle isolation
-- [ ] Docs explain how to add new runtime actions
+- [x] Runtime actions are typed
+- [x] Runtime actions are safely executable
+- [x] Redirect behavior is action-driven where possible
+- [x] Legacy redirect behavior still works
+- [x] Claim preview cannot accidentally execute redirect actions
+- [x] Success page owns post-claim and redirect runtime behavior
+- [x] x-change transports rider runtime payloads without owning semantics
+- [x] x-rider owns action semantics
+- [x] Tests prove lifecycle isolation
+- [x] Docs explain how to add new runtime actions
+
+---
+
+# Remaining High-Value Work
+
+## Runtime frontend tests
+
+Still needed:
+
+- executor tests
+- sequencing-order tests
+- duplicate-execution tests
+- URL safety tests
+
+See:
+
+```text
+docs/todo/runtime_frontend_tests.md
+```
+
+---
+
+# Architectural Outcome
+
+Phase 7 established:
+
+```text
+deterministic rider runtime lifecycle orchestration
+```
+
+including:
+
+- lifecycle isolation
+- runtime action semantics
+- blocking presentation sequencing
+- runtime ownership boundaries
+- redirect runtime orchestration
+- frontend/backend runtime separation
+
+This forms the foundation for:
+
+- Phase 8 — Driver composition runtime
+- Phase 9 — x-ray extraction runtime
+- Phase 10 — analytics + monetization runtime
+- Phase 11 — multi-client runtime protocol
