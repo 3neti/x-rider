@@ -149,15 +149,31 @@ async function handleCopyAction(): Promise<void> {
 
   await runtime.executeMany(copyActions.value);
 }
+
+const isBlockingPresentation = computed(() =>
+    isModal.value || isFullscreen.value
+);
+
+const dialogLabel = computed(() =>
+    String(
+        props.stage.payload?.aria_label
+        ?? props.stage.payload?.label
+        ?? props.stage.key
+        ?? 'Rider experience'
+    )
+);
 </script>
 
 <template>
   <template v-if="!dismissed">
     <div
+        :role="isBlockingPresentation ? 'dialog' : undefined"
+        :aria-modal="isBlockingPresentation ? 'true' : undefined"
+        :aria-label="isBlockingPresentation ? dialogLabel : undefined"
         :class="{
-                'fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4': isModal,
-                'fixed inset-0 z-50 flex items-center justify-center bg-background px-6': isFullscreen,
-            }"
+        'fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4': isModal,
+        'fixed inset-0 z-50 flex items-center justify-center bg-background px-6': isFullscreen,
+    }"
     >
       <div
           :class="{
@@ -175,6 +191,7 @@ async function handleCopyAction(): Promise<void> {
             v-else-if="hasCopyActions"
             type="button"
             class="inline-flex rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+            :aria-label="copyLabel"
             @click="handleCopyAction"
         >
           {{ copyLabel }}
@@ -228,6 +245,7 @@ async function handleCopyAction(): Promise<void> {
           <p
               v-if="redirectTimeout > 0"
               class="mt-1 text-xs text-muted-foreground"
+              aria-live="polite"
           >
             Redirecting in {{ Math.max(remainingSeconds, 0) }} seconds.
           </p>
@@ -237,6 +255,7 @@ async function handleCopyAction(): Promise<void> {
             v-if="isModal || isFullscreen"
             type="button"
             class="w-full rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+            aria-label="Continue"
             @click="dismiss"
         >
           Continue
