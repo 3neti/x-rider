@@ -1,5 +1,6 @@
 <?php
 
+use LBHurtado\XRider\Data\RiderRuntimeActionData;
 use LBHurtado\XRider\Data\RiderStageData;
 use LBHurtado\XRider\Enums\RiderStageType;
 
@@ -57,4 +58,28 @@ it('safely handles unknown stage types', function () {
         ->and($stage->typeEnum())->toBeNull()
         ->and($stage->isRenderable())->toBeFalse()
         ->and($stage->isRedirectLike())->toBeFalse();
+});
+
+it('normalizes runtime actions on stage data', function () {
+    $stage = RiderStageData::fromArray([
+        'type' => 'cta',
+        'key' => 'reward-cta',
+        'actions' => [
+            [
+                'type' => 'open_url',
+                'timing' => 'on_click',
+                'requires_user_gesture' => true,
+                'payload' => [
+                    'url' => 'https://example.com/reward',
+                ],
+            ],
+        ],
+    ]);
+
+    expect($stage->actions)->toHaveCount(1)
+        ->and($stage->actions[0])->toBeInstanceOf(RiderRuntimeActionData::class)
+        ->and($stage->actions[0]->type)->toBe('open_url')
+        ->and($stage->actions[0]->timing)->toBe('on_click')
+        ->and($stage->actions[0]->requires_user_gesture)->toBeTrue()
+        ->and($stage->actions[0]->payload['url'])->toBe('https://example.com/reward');
 });
