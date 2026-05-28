@@ -21,6 +21,14 @@ const props = defineProps({
   },
 });
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value && typeof value === 'object' && !Array.isArray(value));
+}
+
+function isRuntimeStage(value: unknown): value is RawRiderStage {
+  return isRecord(value);
+}
+
 const visibleStageKeys = ref<string[]>([]);
 const executedActionKeys = ref<string[]>([]);
 const dismissedBlockingStageKeys = ref<string[]>([]);
@@ -52,7 +60,9 @@ const runtime = useRiderRuntimeActions({
 });
 
 const enabledStages = computed((): RawRiderStage[] =>
-    props.stages.filter((stage: RawRiderStage) => stage.enabled !== false)
+    props.stages
+        .filter(isRuntimeStage)
+        .filter((stage: RawRiderStage) => stage.enabled !== false)
 );
 
 function isInitiallyHidden(stage: RawRiderStage): boolean {

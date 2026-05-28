@@ -139,14 +139,24 @@ export function useRiderRuntimeActions(context: RiderRuntimeActionContext = {}) 
         }
     }
 
+    function isRecord(value: unknown): value is Record<string, unknown> {
+        return Boolean(value && typeof value === 'object' && !Array.isArray(value));
+    }
+
+    function isRuntimeAction(value: unknown): value is RiderRuntimeAction {
+        return isRecord(value);
+    }
+
     function actionsForTiming(
-        actions: RiderRuntimeAction[] | undefined,
+        actions: unknown[] | undefined,
         timing: RiderRuntimeActionTiming
     ): RiderRuntimeAction[] {
-        return (actions || []).filter((action) =>
-            action.enabled !== false
-            && (action.timing || 'on_click') === timing
-        );
+        return (actions || [])
+            .filter(isRuntimeAction)
+            .filter((action) =>
+                action.enabled !== false
+                && (action.timing || 'on_click') === timing
+            );
     }
 
     return {
