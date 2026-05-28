@@ -15,6 +15,12 @@ const emit = defineEmits(['dismissed']);
 
 const dismissed = ref(false);
 
+const imageFailed = ref(false);
+
+function handleImageError(): void {
+  imageFailed.value = true;
+}
+
 const presentation = computed(() =>
     String(
         props.stage.payload?.presentation
@@ -199,11 +205,22 @@ async function handleCopyAction(): Promise<void> {
         </button>
 
         <img
-            v-else-if="stage.type === 'image' && imageSrc"
+            v-else-if="stage.type === 'image' && imageSrc && !imageFailed"
             :src="imageSrc"
             :alt="imageAlt"
             class="w-full rounded-xl object-cover"
+            @error="handleImageError"
         />
+
+        <div
+            v-else-if="stage.type === 'image' && imageFailed"
+            data-test="image-fallback"
+            role="img"
+            :aria-label="imageAlt"
+            class="rounded-xl border border-dashed bg-muted/40 p-6 text-center text-sm text-muted-foreground"
+        >
+          Unable to load image.
+        </div>
 
         <a
             v-else-if="stage.type === 'link' && url"
