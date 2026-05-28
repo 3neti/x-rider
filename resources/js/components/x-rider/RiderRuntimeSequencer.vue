@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import RiderStagePresenter from './RiderStagePresenter.vue';
 import type { RawRiderStage, RiderRuntimeAction } from './types';
 import { useRiderRuntimeActions } from './useRiderRuntimeActions';
@@ -192,6 +192,8 @@ function actionsForStageAndTiming(
   return runtime.actionsForTiming(actions, timing);
 }
 
+const isUnmounted = ref(false);
+
 async function executeStageActions(
     stage: RawRiderStage,
     stageIndex: number,
@@ -200,6 +202,10 @@ async function executeStageActions(
   const actions = actionsForStageAndTiming(stage, timing);
 
   for (let actionIndex = 0; actionIndex < actions.length; actionIndex += 1) {
+    if (isUnmounted.value) {
+      return;
+    }
+
     const action = actions[actionIndex];
     const key = actionKey(stage, action, stageIndex, actionIndex);
 
@@ -210,10 +216,18 @@ async function executeStageActions(
     markExecuted(key);
 
     await runtime.execute(action);
+
+    if (isUnmounted.value) {
+      return;
+    }
   }
 }
 
 async function runStage(stage: RawRiderStage, stageIndex: number): Promise<void> {
+  if (isUnmounted.value) {
+    return;
+  }
+
   const key = stageKey(stage, stageIndex);
 
   showStage(key);
@@ -225,6 +239,10 @@ async function runStage(stage: RawRiderStage, stageIndex: number): Promise<void>
 
 async function runSequence(): Promise<void> {
   for (let index = 0; index < enabledStages.value.length; index += 1) {
+    if (isUnmounted.value) {
+      return;
+    }
+
     await runStage(enabledStages.value[index], index);
   }
 }
@@ -241,6 +259,10 @@ watch(
 
 onMounted(() => {
   void runSequence();
+});
+
+onUnmounted(() => {
+  isUnmounted.value = true;
 });
 
 function advanceBlockingStage(): void {
