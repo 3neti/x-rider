@@ -12,6 +12,14 @@ rider:
       content_type: markdown
       timeout: 3
 
+    - type: image
+      key: demo-image
+      phase: pre_claim
+      presentation: inline
+      payload:
+        src: https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1200&auto=format&fit=crop&q=80
+        alt: Demo rider image
+
     - type: link
       key: demo-link
       phase: pre_claim
@@ -45,7 +53,7 @@ rider:
       timeout: 3
 
     - type: splash
-      key: anais-splash
+      key: demo-fullscreen
       phase: pre_claim
       presentation: fullscreen
       meta:

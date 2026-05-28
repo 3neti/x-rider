@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import RiderStagePresenter from './RiderStagePresenter.vue';
 import type { RawRiderStage, RiderRuntimeAction } from './types';
 import { useRiderRuntimeActions } from './useRiderRuntimeActions';
@@ -15,17 +15,22 @@ const props = defineProps({
     type: String,
     default: null,
   },
+  continueLabel: {
+    type: String,
+    default: 'Continue',
+  },
 });
 
 const visibleStageKeys = ref<string[]>([]);
 const executedActionKeys = ref<string[]>([]);
+const dismissedBlockingStageKeys = ref<string[]>([]);
 
 function stageKey(stage: RawRiderStage, index: number): string {
   return stage.key ?? `${stage.type}-${index}`;
 }
 
 function isVisibleByKey(stageKey: string): boolean {
-  return visibleStageKeys.value.indexOf(stageKey) >= 0;
+  return visibleStageKeys.value.includes(stageKey);
 }
 
 function showStage(stageKey: string): void {
@@ -57,12 +62,57 @@ function isInitiallyHidden(stage: RawRiderStage): boolean {
   );
 }
 
+function presentationOf(stage: RawRiderStage): string {
+  return String(
+      stage.payload?.presentation
+      ?? stage.presentation
+      ?? 'inline'
+  ).trim().toLowerCase();
+}
+
+function isBlockingStage(stage: RawRiderStage): boolean {
+  return stage.enabled !== false
+      && ['modal', 'fullscreen'].includes(presentationOf(stage));
+}
+
+function isRedirectStage(stage: RawRiderStage): boolean {
+  return stage.type === 'redirect';
+}
+
 const visibleStages = computed((): RawRiderStage[] =>
     enabledStages.value.filter((stage: RawRiderStage, index: number) => {
       const key = stageKey(stage, index);
+
       return isVisibleByKey(key) || !isInitiallyHidden(stage);
     })
 );
+
+const inlineStages = computed((): RawRiderStage[] =>
+    visibleStages.value.filter((stage: RawRiderStage) =>
+        !isBlockingStage(stage)
+        && !isRedirectStage(stage)
+    )
+);
+
+const blockingStages = computed((): RawRiderStage[] =>
+    visibleStages.value.filter((stage: RawRiderStage) =>
+        isBlockingStage(stage)
+        && !dismissedBlockingStageKeys.value.includes(stage.key ?? '')
+    )
+);
+
+const activeBlockingStage = computed<RawRiderStage | null>(() =>
+    blockingStages.value[0] ?? null
+);
+
+const activePresentation = computed(() =>
+    activeBlockingStage.value
+        ? presentationOf(activeBlockingStage.value)
+        : 'inline'
+);
+
+const isModal = computed(() => activePresentation.value === 'modal');
+const isFullscreen = computed(() => activePresentation.value === 'fullscreen');
 
 function actionKey(
     stage: RawRiderStage,
@@ -74,7 +124,7 @@ function actionKey(
 }
 
 function hasExecuted(key: string): boolean {
-  return executedActionKeys.value.indexOf(key) >= 0;
+  return executedActionKeys.value.includes(key);
 }
 
 function markExecuted(key: string): void {
@@ -124,10 +174,9 @@ function actionsForStageAndTiming(
     stage: RawRiderStage,
     timing: RuntimeTiming
 ): RiderRuntimeAction[] {
-  const legacy = legacyRedirectActions(stage);
   const actions = [
     ...(stage.actions ?? []),
-    ...legacy,
+    ...legacyRedirectActions(stage),
   ];
 
   return runtime.actionsForTiming(actions, timing);
@@ -155,6 +204,10 @@ async function executeStageActions(
 }
 
 async function runStage(stage: RawRiderStage, stageIndex: number): Promise<void> {
+  const key = stageKey(stage, stageIndex);
+
+  showStage(key);
+
   await executeStageActions(stage, stageIndex, 'on_mount');
   await executeStageActions(stage, stageIndex, 'after_delay');
   await executeStageActions(stage, stageIndex, 'on_complete');
@@ -166,39 +219,32 @@ async function runSequence(): Promise<void> {
   }
 }
 
+watch(
+    () => props.stages,
+    () => {
+      visibleStageKeys.value = [];
+
+      void runSequence();
+    },
+    { deep: true }
+);
+
 onMounted(() => {
   void runSequence();
 });
 
-const blockingStageIndex = ref(0);
-
-function presentationOf(stage: RawRiderStage): string {
-  return String(
-      stage.payload?.presentation
-      ?? stage.presentation
-      ?? 'inline'
-  ).trim().toLowerCase();
-}
-
-function isBlockingStage(stage: RawRiderStage): boolean {
-  return presentationOf(stage) === 'modal'
-      || presentationOf(stage) === 'fullscreen';
-}
-
-const inlineStages = computed((): RawRiderStage[] =>
-    visibleStages.value.filter((stage: RawRiderStage) => !isBlockingStage(stage))
-);
-
-const blockingStages = computed((): RawRiderStage[] =>
-    visibleStages.value.filter((stage: RawRiderStage) => isBlockingStage(stage))
-);
-
-const activeBlockingStage = computed<RawRiderStage | null>(() =>
-    blockingStages.value[blockingStageIndex.value] ?? null
-);
-
 function advanceBlockingStage(): void {
-  blockingStageIndex.value += 1;
+  const stage = activeBlockingStage.value;
+
+  if (!stage) {
+    return;
+  }
+
+  const key = stage.key ?? `${stage.type}:${dismissedBlockingStageKeys.value.length}`;
+
+  if (!dismissedBlockingStageKeys.value.includes(key)) {
+    dismissedBlockingStageKeys.value.push(key);
+  }
 }
 </script>
 
@@ -214,10 +260,53 @@ function advanceBlockingStage(): void {
     />
   </div>
 
-  <RiderStagePresenter
-      v-if="activeBlockingStage"
-      :key="activeBlockingStage.key ?? activeBlockingStage.type"
-      :stage="activeBlockingStage"
-      @dismissed="advanceBlockingStage"
-  />
+  <div
+      v-if="activeBlockingStage && isModal"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-background/80 px-4 backdrop-blur-sm"
+      role="dialog"
+      aria-modal="true"
+  >
+    <div class="w-full max-w-lg rounded-2xl border bg-card p-5 shadow-xl">
+      <div class="space-y-4">
+        <RiderStagePresenter
+            :stage="activeBlockingStage"
+            @dismissed="advanceBlockingStage"
+        />
+
+        <button
+            type="button"
+            data-test="dismiss"
+            class="inline-flex w-full items-center justify-center rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition hover:bg-primary/90"
+            @click="advanceBlockingStage"
+        >
+          {{ continueLabel }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <section
+      v-else-if="activeBlockingStage && isFullscreen"
+      class="fixed inset-0 z-[60] flex min-h-screen items-center justify-center bg-background px-6 py-10"
+      role="dialog"
+      aria-modal="true"
+  >
+    <div class="mx-auto flex h-full w-full max-w-2xl flex-col justify-center">
+      <div class="space-y-8 text-center">
+        <RiderStagePresenter
+            :stage="activeBlockingStage"
+            @dismissed="advanceBlockingStage"
+        />
+
+        <button
+            type="button"
+            data-test="dismiss"
+            class="inline-flex w-full items-center justify-center rounded-full bg-primary px-4 py-3 text-sm font-medium text-primary-foreground transition hover:bg-primary/90 sm:w-auto sm:px-8"
+            @click="advanceBlockingStage"
+        >
+          {{ continueLabel }}
+        </button>
+      </div>
+    </div>
+  </section>
 </template>

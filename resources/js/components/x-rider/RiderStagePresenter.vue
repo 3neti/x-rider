@@ -11,6 +11,8 @@ const props = defineProps({
   },
 });
 
+const emit = defineEmits(['dismissed']);
+
 const dismissed = ref(false);
 
 const presentation = computed(() =>
@@ -23,13 +25,23 @@ const presentation = computed(() =>
 
 const isModal = computed(() => presentation.value === 'modal');
 const isFullscreen = computed(() => presentation.value === 'fullscreen');
+const isBlockingPresentation = computed(() => isModal.value || isFullscreen.value);
+
+const dialogLabel = computed(() =>
+    String(
+        props.stage.payload?.aria_label
+        ?? props.stage.payload?.label
+        ?? props.stage.key
+        ?? 'Rider experience'
+    )
+);
 
 const label = computed(() =>
-    String(props.stage.payload?.label ?? 'Continue')
+    String(props.stage.payload?.label ?? props.stage.label ?? 'Continue')
 );
 
 const url = computed(() =>
-    String(props.stage.payload?.url ?? props.stage.src ?? '')
+    String(props.stage.payload?.url ?? props.stage.url ?? props.stage.src ?? '')
 );
 
 const imageSrc = computed(() =>
@@ -57,6 +69,10 @@ const stageContent = computed(() => ({
     ...(props.stage.meta ?? {}),
   },
 }));
+
+const hasStageContent = computed(() =>
+    Boolean(stageContent.value.content)
+);
 
 const remainingSeconds = ref(0);
 let countdownTimer: number | null = null;
@@ -93,8 +109,6 @@ async function handleClickAction(event: Event): Promise<void> {
 
   await runtime.executeMany(clickActions.value);
 }
-
-const emit = defineEmits(['dismissed']);
 
 function dismiss(): void {
   dismissed.value = true;
@@ -149,19 +163,6 @@ async function handleCopyAction(): Promise<void> {
 
   await runtime.executeMany(copyActions.value);
 }
-
-const isBlockingPresentation = computed(() =>
-    isModal.value || isFullscreen.value
-);
-
-const dialogLabel = computed(() =>
-    String(
-        props.stage.payload?.aria_label
-        ?? props.stage.payload?.label
-        ?? props.stage.key
-        ?? 'Rider experience'
-    )
-);
 </script>
 
 <template>
@@ -171,19 +172,19 @@ const dialogLabel = computed(() =>
         :aria-modal="isBlockingPresentation ? 'true' : undefined"
         :aria-label="isBlockingPresentation ? dialogLabel : undefined"
         :class="{
-        'fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4': isModal,
-        'fixed inset-0 z-50 flex items-center justify-center bg-background px-6': isFullscreen,
-    }"
+            'fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4': isModal,
+            'fixed inset-0 z-50 flex items-center justify-center bg-background px-6': isFullscreen,
+        }"
     >
       <div
           :class="{
-                    'w-full max-w-md rounded-2xl bg-background p-5 shadow-xl': isModal,
-                    'mx-auto w-full max-w-lg space-y-6 text-center': isFullscreen,
-                    'space-y-3': !isModal && !isFullscreen,
-                }"
+              'w-full max-w-md rounded-2xl bg-background p-5 shadow-xl': isModal,
+              'mx-auto w-full max-w-lg space-y-6 text-center': isFullscreen,
+              'space-y-3': !isModal && !isFullscreen,
+          }"
       >
         <RiderRenderer
-            v-if="stageContent.content && !isRedirect"
+            v-if="hasStageContent && !isRedirect"
             :content="stageContent"
         />
 
@@ -231,7 +232,7 @@ const dialogLabel = computed(() =>
             class="rounded-2xl border bg-card p-5 text-center shadow-sm"
         >
           <RiderRenderer
-              v-if="stageContent.content"
+              v-if="hasStageContent"
               :content="stageContent"
           />
 
@@ -254,6 +255,7 @@ const dialogLabel = computed(() =>
         <button
             v-if="isModal || isFullscreen"
             type="button"
+            data-test="dismiss"
             class="w-full rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
             aria-label="Continue"
             @click="dismiss"
