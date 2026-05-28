@@ -67,10 +67,12 @@ class DefaultRiderStageResolver implements RiderStageResolverContract
 
             $stages[] = [
                 'type' => 'splash',
+                'key' => 'legacy-splash',
+                'phase' => data_get($rider, 'splash_phase', 'pre_claim'),
+                'presentation' => data_get($rider, 'splash_presentation', 'fullscreen'),
                 'content' => data_get($rider, 'splash'),
                 'content_type' => data_get($rider, 'splash_type', 'html'),
                 'timeout' => data_get($rider, 'splash_timeout'),
-                'key' => 'legacy-splash',
                 'meta' => is_array($splashMeta) ? $splashMeta : [],
             ];
         }

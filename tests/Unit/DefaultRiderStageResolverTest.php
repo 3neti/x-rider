@@ -93,3 +93,29 @@ it('resolves through the container binding', function () {
     expect($collection->stages)->toHaveCount(1)
         ->and($collection->stages[0]->payload['content'])->toBe('Container works.');
 });
+
+it('resolves legacy rider splash as fullscreen pre claim stage with metadata', function () {
+    $resolver = app(\LBHurtado\XRider\Contracts\RiderStageResolverContract::class);
+
+    $collection = $resolver->resolve([
+        'splash' => '<strong>Hello</strong>',
+        'splash_timeout' => 3,
+        'splash_meta' => [
+            'sanitized' => true,
+            'html_profile' => 'rider_splash',
+        ],
+    ]);
+
+    $stage = $collection->firstOfType('splash');
+
+    expect($stage)->not->toBeNull()
+        ->and($stage?->key)->toBe('legacy-splash')
+        ->and($stage?->phase)->toBe('pre_claim')
+        ->and($stage?->presentation)->toBe('fullscreen')
+        ->and($stage?->payload['content'])->toBe('<strong>Hello</strong>')
+        ->and($stage?->payload['content_type'])->toBe('html')
+        ->and($stage?->meta)->toMatchArray([
+            'sanitized' => true,
+            'html_profile' => 'rider_splash',
+        ]);
+});

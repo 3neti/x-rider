@@ -47,3 +47,21 @@ it('supports configured splash presentation', function () {
 
     expect($stage->payload['presentation'])->toBe('fullscreen');
 });
+
+it('preserves splash metadata', function () {
+    $driver = new \LBHurtado\XRider\StageDrivers\SplashStageDriver();
+
+    $stage = $driver->make([
+        'content' => '<strong>Hello</strong>',
+        'content_type' => 'html',
+        'meta' => [
+            'sanitized' => true,
+            'html_profile' => 'rider_splash',
+        ],
+    ]);
+
+    expect($stage->meta)->toMatchArray([
+        'sanitized' => true,
+        'html_profile' => 'rider_splash',
+    ]);
+});

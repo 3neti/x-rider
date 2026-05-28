@@ -23,18 +23,30 @@ class SplashStageDriver implements RiderStageDriverContract
         $contentType = RiderContentType::tryFrom((string) data_get($config, 'content_type', RiderContentType::Markdown->value))
             ?? RiderContentType::Markdown;
 
+        $presentation = data_get(
+            $config,
+            'presentation',
+            data_get($context, 'splash_presentation', 'inline')
+        );
+
+        $phase = data_get($config, 'phase', data_get($context, 'phase'));
+
         return new RiderStageData(
             type: RiderStageType::Splash,
             enabled: (bool) data_get($config, 'enabled', filled($content)),
             key: data_get($config, 'key', 'splash'),
+            phase: $phase,
+            presentation: $presentation,
             payload: [
                 'content' => $content,
                 'content_type' => $contentType->value,
                 'timeout' => data_get($config, 'timeout', data_get($context, 'splash_timeout')),
-                'presentation' => data_get($config, 'presentation', data_get($context, 'splash_presentation', 'inline')),
-                'phase' => data_get($config, 'phase', data_get($context, 'phase')),
+                'presentation' => $presentation,
+                'phase' => $phase,
             ],
-            meta: (array) data_get($config, 'meta', []),
+            meta: is_array(data_get($config, 'meta'))
+                ? data_get($config, 'meta')
+                : [],
         );
     }
 }
