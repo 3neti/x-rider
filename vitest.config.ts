@@ -6,9 +6,9 @@ export default defineConfig({
     plugins: [vue()],
     resolve: {
         alias: {
-            '@/components/ui/button': path.resolve(__dirname, 'tests/frontend/stubs/ui-button.ts'),
-            'lucide-vue-next': path.resolve(__dirname, 'tests/frontend/stubs/lucide-vue-next.ts'),
-            '@': path.resolve(__dirname, 'resources/js'),
+            '@/components/ui/button': path.resolve(import.meta.dirname, 'tests/frontend/stubs/ui-button.ts'),
+            'lucide-vue-next': path.resolve(import.meta.dirname, 'tests/frontend/stubs/lucide-vue-next.ts'),
+            '@': path.resolve(import.meta.dirname, 'resources/js'),
         },
     },
     test: {
