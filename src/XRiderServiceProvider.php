@@ -46,8 +46,7 @@ class XRiderServiceProvider extends ServiceProvider
                 ->register($this->app->make(SplashStageDriver::class))
                 ->register($this->app->make(LinkStageDriver::class))
                 ->register($this->app->make(ImageStageDriver::class))
-                ->register($this->app->make(CtaStageDriver::class))
-            ;
+                ->register($this->app->make(CtaStageDriver::class));
         });
         $this->app->singleton(RiderStageResolverContract::class, DefaultRiderStageResolver::class);
     }

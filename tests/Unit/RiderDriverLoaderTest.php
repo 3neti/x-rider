@@ -23,7 +23,7 @@ it('prefers the published driver path over the package fallback', function () {
 
     mkdir($publishedPath, 0777, true);
 
-    file_put_contents($publishedPath.'/default.yaml', <<<YAML
+    file_put_contents($publishedPath.'/default.yaml', <<<'YAML'
 name: default
 version: 9.9.9
 rider:
@@ -56,8 +56,8 @@ it('throws when a driver does not exist', function () {
 it('loads the package demo driver', function () {
     config()->set('x-rider.package_drivers_path', __DIR__.'/../../resources/rider-drivers');
 
-    $loader = new \LBHurtado\XRider\Support\RiderDriverLoader(
-        new \Illuminate\Filesystem\Filesystem
+    $loader = new RiderDriverLoader(
+        new Filesystem
     );
 
     $driver = $loader->load('demo');
@@ -71,6 +71,5 @@ it('loads the package demo driver', function () {
         ->and(data_get($driver, 'rider.stages.4.key'))->toBe('demo-modal')
         ->and(data_get($driver, 'rider.stages.5.key'))->toBe('demo-fullscreen')
         ->and(data_get($driver, 'rider.stages.6.key'))->toBe('demo-success-message')
-        ->and(data_get($driver, 'rider.stages.7.key'))->toBe('demo-redirect')
-    ;
+        ->and(data_get($driver, 'rider.stages.7.key'))->toBe('demo-redirect');
 });

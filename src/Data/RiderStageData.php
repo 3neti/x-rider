@@ -11,9 +11,9 @@ class RiderStageData extends Data
     use NormalizesRiderRuntimeActions;
 
     /**
-     * @param array<string, mixed> $payload
-     * @param array<string, mixed> $meta
-     * @param array<int, RiderRuntimeActionData> $actions
+     * @param  array<string, mixed>  $payload
+     * @param  array<string, mixed>  $meta
+     * @param  array<int, RiderRuntimeActionData>  $actions
      */
     public function __construct(
         public RiderStageType|string $type,

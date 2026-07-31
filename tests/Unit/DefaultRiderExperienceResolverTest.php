@@ -2,6 +2,7 @@
 
 use Illuminate\Filesystem\Filesystem;
 use LBHurtado\XRider\Contracts\RiderCampaignResolverContract;
+use LBHurtado\XRider\Contracts\RiderStageResolverContract;
 use LBHurtado\XRider\Data\RiderCampaignData;
 use LBHurtado\XRider\Data\RiderSubjectData;
 use LBHurtado\XRider\Enums\RiderOutcomeState;
@@ -20,7 +21,8 @@ function xRiderTestSubject(): RiderSubjectData
 
 function xRiderCampaignStub(): RiderCampaignResolverContract
 {
-    return new class implements RiderCampaignResolverContract {
+    return new class implements RiderCampaignResolverContract
+    {
         public function resolve(RiderSubjectData $subject, array $context = []): RiderCampaignData
         {
             return new RiderCampaignData(
@@ -38,7 +40,7 @@ it('resolves the default rider experience from yaml', function () {
     $resolver = new DefaultRiderExperienceResolver(
         campaigns: xRiderCampaignStub(),
         drivers: new RiderDriverLoader(new Filesystem),
-        stages: app(\LBHurtado\XRider\Contracts\RiderStageResolverContract::class),
+        stages: app(RiderStageResolverContract::class),
     );
 
     $experience = $resolver->resolve(xRiderTestSubject());
@@ -55,7 +57,7 @@ it('uses pending content for accepted pending state', function () {
     $resolver = new DefaultRiderExperienceResolver(
         campaigns: xRiderCampaignStub(),
         drivers: new RiderDriverLoader(new Filesystem),
-        stages: app(\LBHurtado\XRider\Contracts\RiderStageResolverContract::class),
+        stages: app(RiderStageResolverContract::class),
     );
 
     $experience = $resolver->resolve(xRiderTestSubject(), [
@@ -71,7 +73,7 @@ it('lets context rider override yaml rider content', function () {
     $resolver = new DefaultRiderExperienceResolver(
         campaigns: xRiderCampaignStub(),
         drivers: new RiderDriverLoader(new Filesystem),
-        stages: app(\LBHurtado\XRider\Contracts\RiderStageResolverContract::class),
+        stages: app(RiderStageResolverContract::class),
     );
 
     $experience = $resolver->resolve(xRiderTestSubject(), [
@@ -91,7 +93,7 @@ it('enables redirect when legacy rider url is provided by context', function () 
     $resolver = new DefaultRiderExperienceResolver(
         campaigns: xRiderCampaignStub(),
         drivers: new RiderDriverLoader(new Filesystem),
-        stages: app(\LBHurtado\XRider\Contracts\RiderStageResolverContract::class),
+        stages: app(RiderStageResolverContract::class),
     );
 
     $experience = $resolver->resolve(xRiderTestSubject(), [
@@ -113,7 +115,7 @@ it('attaches resolved stages to rider experience', function () {
     $resolver = new DefaultRiderExperienceResolver(
         campaigns: xRiderCampaignStub(),
         drivers: new RiderDriverLoader(new Filesystem),
-        stages: app(\LBHurtado\XRider\Contracts\RiderStageResolverContract::class),
+        stages: app(RiderStageResolverContract::class),
     );
 
     $experience = $resolver->resolve(xRiderTestSubject(), [
@@ -143,7 +145,7 @@ it('normalizes explicit redirect stage into rider redirect data', function () {
     $resolver = new DefaultRiderExperienceResolver(
         campaigns: xRiderCampaignStub(),
         drivers: new RiderDriverLoader(new Filesystem),
-        stages: app(\LBHurtado\XRider\Contracts\RiderStageResolverContract::class),
+        stages: app(RiderStageResolverContract::class),
     );
 
     $experience = $resolver->resolve(xRiderTestSubject(), [
@@ -177,7 +179,7 @@ it('does not enable redirect when explicit redirect stage is disabled', function
     $resolver = new DefaultRiderExperienceResolver(
         campaigns: xRiderCampaignStub(),
         drivers: new RiderDriverLoader(new Filesystem),
-        stages: app(\LBHurtado\XRider\Contracts\RiderStageResolverContract::class),
+        stages: app(RiderStageResolverContract::class),
     );
 
     $experience = $resolver->resolve(xRiderTestSubject(), [
@@ -202,7 +204,7 @@ it('normalizes explicit message stage into rider success content', function () {
     $resolver = new DefaultRiderExperienceResolver(
         campaigns: xRiderCampaignStub(),
         drivers: new RiderDriverLoader(new Filesystem),
-        stages: app(\LBHurtado\XRider\Contracts\RiderStageResolverContract::class),
+        stages: app(RiderStageResolverContract::class),
     );
 
     $experience = $resolver->resolve(xRiderTestSubject(), [
@@ -228,7 +230,7 @@ it('keeps legacy rider message precedence over message stages', function () {
     $resolver = new DefaultRiderExperienceResolver(
         campaigns: xRiderCampaignStub(),
         drivers: new RiderDriverLoader(new Filesystem),
-        stages: app(\LBHurtado\XRider\Contracts\RiderStageResolverContract::class),
+        stages: app(RiderStageResolverContract::class),
     );
 
     $experience = $resolver->resolve(xRiderTestSubject(), [
@@ -253,7 +255,7 @@ it('normalizes explicit splash stage into rider pre claim content', function () 
     $resolver = new DefaultRiderExperienceResolver(
         campaigns: xRiderCampaignStub(),
         drivers: new RiderDriverLoader(new Filesystem),
-        stages: app(\LBHurtado\XRider\Contracts\RiderStageResolverContract::class),
+        stages: app(RiderStageResolverContract::class),
     );
 
     $experience = $resolver->resolve(xRiderTestSubject(), [
@@ -284,7 +286,7 @@ it('keeps legacy pre claim precedence over splash stages', function () {
     $resolver = new DefaultRiderExperienceResolver(
         campaigns: xRiderCampaignStub(),
         drivers: new RiderDriverLoader(new Filesystem),
-        stages: app(\LBHurtado\XRider\Contracts\RiderStageResolverContract::class),
+        stages: app(RiderStageResolverContract::class),
     );
 
     $experience = $resolver->resolve(xRiderTestSubject(), [
@@ -314,7 +316,7 @@ it('propagates sanitized legacy splash metadata into rider pre claim content', f
     $resolver = new DefaultRiderExperienceResolver(
         campaigns: xRiderCampaignStub(),
         drivers: new RiderDriverLoader(new Filesystem),
-        stages: app(\LBHurtado\XRider\Contracts\RiderStageResolverContract::class),
+        stages: app(RiderStageResolverContract::class),
     );
 
     $experience = $resolver->resolve(xRiderTestSubject(), [
@@ -346,7 +348,7 @@ it('propagates sanitized legacy splash metadata into resolved splash stage', fun
     $resolver = new DefaultRiderExperienceResolver(
         campaigns: xRiderCampaignStub(),
         drivers: new RiderDriverLoader(new Filesystem),
-        stages: app(\LBHurtado\XRider\Contracts\RiderStageResolverContract::class),
+        stages: app(RiderStageResolverContract::class),
     );
 
     $experience = $resolver->resolve(xRiderTestSubject(), [

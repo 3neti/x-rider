@@ -4,7 +4,7 @@ use LBHurtado\XRider\Enums\RiderStageType;
 use LBHurtado\XRider\StageDrivers\RedirectStageDriver;
 
 it('creates a redirect stage from url', function () {
-    $stage = (new RedirectStageDriver())->make([
+    $stage = (new RedirectStageDriver)->make([
         'url' => 'https://merchant.example.com',
         'timeout' => 7,
         'fallback_url' => '/fallback',
@@ -18,14 +18,14 @@ it('creates a redirect stage from url', function () {
 });
 
 it('creates a disabled redirect stage when url is missing', function () {
-    $stage = (new RedirectStageDriver())->make();
+    $stage = (new RedirectStageDriver)->make();
 
     expect($stage->enabled)->toBeFalse()
         ->and($stage->payload['url'])->toBeNull();
 });
 
 it('supports legacy redirect timeout from context', function () {
-    $stage = (new RedirectStageDriver())->make(
+    $stage = (new RedirectStageDriver)->make(
         config: [
             'url' => 'https://merchant.example.com',
         ],
@@ -38,7 +38,7 @@ it('supports legacy redirect timeout from context', function () {
 });
 
 it('creates redirect payload for runtime execution', function () {
-    $stage = (new RedirectStageDriver())->make([
+    $stage = (new RedirectStageDriver)->make([
         'payload' => [
             'url' => 'https://example.com/success',
             'timeout' => 5,

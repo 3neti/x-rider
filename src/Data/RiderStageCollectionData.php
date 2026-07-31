@@ -7,7 +7,7 @@ use Spatie\LaravelData\Data;
 class RiderStageCollectionData extends Data
 {
     /**
-     * @param array<int, RiderStageData> $stages
+     * @param  array<int, RiderStageData>  $stages
      */
     public function __construct(
         public array $stages = [],

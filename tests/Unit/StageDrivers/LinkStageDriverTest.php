@@ -4,7 +4,7 @@ use LBHurtado\XRider\Enums\RiderStageType;
 use LBHurtado\XRider\StageDrivers\LinkStageDriver;
 
 it('creates a link stage from payload', function () {
-    $stage = (new LinkStageDriver())->make([
+    $stage = (new LinkStageDriver)->make([
         'key' => 'learn-more',
         'payload' => [
             'label' => 'Learn more',
@@ -21,7 +21,7 @@ it('creates a link stage from payload', function () {
 });
 
 it('creates a disabled link stage when url is missing', function () {
-    $stage = (new LinkStageDriver())->make([
+    $stage = (new LinkStageDriver)->make([
         'payload' => [
             'label' => 'Learn more',
         ],
@@ -33,7 +33,7 @@ it('creates a disabled link stage when url is missing', function () {
 });
 
 it('supports top-level link fields for simple yaml', function () {
-    $stage = (new LinkStageDriver())->make([
+    $stage = (new LinkStageDriver)->make([
         'label' => 'Open promo',
         'url' => 'https://example.com/promo',
         'presentation' => 'inline',

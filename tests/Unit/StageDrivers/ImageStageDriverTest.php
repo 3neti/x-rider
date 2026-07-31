@@ -4,7 +4,7 @@ use LBHurtado\XRider\Enums\RiderStageType;
 use LBHurtado\XRider\StageDrivers\ImageStageDriver;
 
 it('creates an image stage from top level config', function () {
-    $stage = (new ImageStageDriver())->make([
+    $stage = (new ImageStageDriver)->make([
         'key' => 'demo-image',
         'src' => 'https://example.com/banner.png',
         'alt' => 'Demo banner',
@@ -19,7 +19,7 @@ it('creates an image stage from top level config', function () {
 });
 
 it('creates an image stage from payload config', function () {
-    $stage = (new ImageStageDriver())->make([
+    $stage = (new ImageStageDriver)->make([
         'payload' => [
             'src' => 'https://example.com/banner.png',
             'alt' => 'Demo banner',
@@ -33,7 +33,7 @@ it('creates an image stage from payload config', function () {
 });
 
 it('creates a disabled image stage when src is missing', function () {
-    $stage = (new ImageStageDriver())->make([
+    $stage = (new ImageStageDriver)->make([
         'alt' => 'Missing image',
     ]);
 

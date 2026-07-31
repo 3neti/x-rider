@@ -1,3 +1,5 @@
 <?php
 
-uses(LBHurtado\XRider\Tests\TestCase::class)->in('Feature', 'Unit');
+use LBHurtado\XRider\Tests\TestCase;
+
+uses(TestCase::class)->in('Feature', 'Unit');

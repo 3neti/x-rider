@@ -4,7 +4,7 @@ use LBHurtado\XRider\Enums\RiderStageType;
 use LBHurtado\XRider\StageDrivers\MessageStageDriver;
 
 it('creates a message stage from content', function () {
-    $stage = (new MessageStageDriver())->make([
+    $stage = (new MessageStageDriver)->make([
         'content' => 'Hello rider.',
     ]);
 
@@ -16,14 +16,14 @@ it('creates a message stage from content', function () {
 });
 
 it('creates a disabled message stage when no content exists', function () {
-    $stage = (new MessageStageDriver())->make();
+    $stage = (new MessageStageDriver)->make();
 
     expect($stage->enabled)->toBeFalse()
         ->and($stage->payload['content'])->toBeNull();
 });
 
 it('supports legacy message key', function () {
-    $stage = (new MessageStageDriver())->make([
+    $stage = (new MessageStageDriver)->make([
         'message' => 'Legacy message.',
     ]);
 

@@ -4,7 +4,7 @@ use LBHurtado\XRider\Enums\RiderStageType;
 use LBHurtado\XRider\StageDrivers\CtaStageDriver;
 
 it('creates a cta stage from payload config', function () {
-    $stage = (new CtaStageDriver())->make([
+    $stage = (new CtaStageDriver)->make([
         'key' => 'demo-cta',
         'payload' => [
             'label' => 'Open Reward',
@@ -23,7 +23,7 @@ it('creates a cta stage from payload config', function () {
 });
 
 it('creates a cta stage from top level config', function () {
-    $stage = (new CtaStageDriver())->make([
+    $stage = (new CtaStageDriver)->make([
         'label' => 'Continue',
         'action' => 'open_url',
         'url' => 'https://example.com',

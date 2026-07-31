@@ -8,6 +8,7 @@ use LBHurtado\XRider\Contracts\RiderStageResolverContract;
 use LBHurtado\XRider\Data\RiderContentData;
 use LBHurtado\XRider\Data\RiderExperienceData;
 use LBHurtado\XRider\Data\RiderRedirectData;
+use LBHurtado\XRider\Data\RiderStageData;
 use LBHurtado\XRider\Data\RiderSubjectData;
 use LBHurtado\XRider\Enums\RiderContentType;
 use LBHurtado\XRider\Enums\RiderOutcomeState;
@@ -134,7 +135,7 @@ class DefaultRiderExperienceResolver implements RiderExperienceResolverContract
         array $rider,
         array $contextRider,
         mixed $redirectUrl,
-        ?\LBHurtado\XRider\Data\RiderStageData $redirectStage = null,
+        ?RiderStageData $redirectStage = null,
     ): bool {
         if (! $state->riderMayRun()) {
             return false;
@@ -185,7 +186,7 @@ class DefaultRiderExperienceResolver implements RiderExperienceResolverContract
 
     protected function preClaimContent(
         array $rider,
-        ?\LBHurtado\XRider\Data\RiderStageData $splashStage = null,
+        ?RiderStageData $splashStage = null,
     ): ?RiderContentData {
         $preClaim = $this->contentFromArray(data_get($rider, 'pre_claim'));
 

@@ -15,7 +15,7 @@ class RiderDriverNotFound extends RuntimeException
 
         return new self(
             "Rider driver [{$name}] was not found."
-            .($paths ? PHP_EOL."Searched paths:".PHP_EOL.$paths : '')
+            .($paths ? PHP_EOL.'Searched paths:'.PHP_EOL.$paths : '')
         );
     }
 }

@@ -7,7 +7,8 @@ use LBHurtado\XRider\Support\RiderStageDriverRegistry;
 
 function fakeMessageStageDriver(): RiderStageDriverContract
 {
-    return new class implements RiderStageDriverContract {
+    return new class implements RiderStageDriverContract
+    {
         public function type(): string
         {
             return RiderStageType::Message->value;
@@ -29,7 +30,7 @@ function fakeMessageStageDriver(): RiderStageDriverContract
 }
 
 it('registers and retrieves a stage driver', function () {
-    $registry = new RiderStageDriverRegistry();
+    $registry = new RiderStageDriverRegistry;
 
     $registry->register(fakeMessageStageDriver());
 
@@ -38,7 +39,7 @@ it('registers and retrieves a stage driver', function () {
 });
 
 it('returns all registered drivers', function () {
-    $registry = new RiderStageDriverRegistry();
+    $registry = new RiderStageDriverRegistry;
 
     $registry->register(fakeMessageStageDriver());
 
@@ -47,13 +48,13 @@ it('returns all registered drivers', function () {
 });
 
 it('throws when retrieving an unknown driver', function () {
-    $registry = new RiderStageDriverRegistry();
+    $registry = new RiderStageDriverRegistry;
 
     $registry->get('unknown');
 })->throws(RuntimeException::class, 'Rider stage driver [unknown] is not registered.');
 
 it('forgets a registered driver', function () {
-    $registry = new RiderStageDriverRegistry();
+    $registry = new RiderStageDriverRegistry;
 
     $registry->register(fakeMessageStageDriver());
 
@@ -65,7 +66,7 @@ it('forgets a registered driver', function () {
 });
 
 it('flushes all registered drivers', function () {
-    $registry = new RiderStageDriverRegistry();
+    $registry = new RiderStageDriverRegistry;
 
     $registry->register(fakeMessageStageDriver());
 

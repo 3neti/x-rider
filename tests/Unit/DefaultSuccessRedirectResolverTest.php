@@ -1,14 +1,11 @@
 <?php
 
-use Illuminate\Filesystem\Filesystem;
 use LBHurtado\XRider\Data\RiderContentData;
 use LBHurtado\XRider\Data\RiderExperienceData;
 use LBHurtado\XRider\Data\RiderRedirectData;
 use LBHurtado\XRider\Data\RiderSubjectData;
 use LBHurtado\XRider\Enums\RiderOutcomeState;
-use LBHurtado\XRider\Services\DefaultRiderExperienceResolver;
 use LBHurtado\XRider\Services\DefaultSuccessRedirectResolver;
-use LBHurtado\XRider\Support\RiderDriverLoader;
 
 function xRiderRedirectExperience(array $redirect): RiderExperienceData
 {

@@ -4,7 +4,7 @@ use LBHurtado\XRider\Enums\RiderStageType;
 use LBHurtado\XRider\StageDrivers\SplashStageDriver;
 
 it('creates a splash stage from content', function () {
-    $stage = (new SplashStageDriver())->make([
+    $stage = (new SplashStageDriver)->make([
         'content' => 'Welcome!',
         'timeout' => 2,
     ]);
@@ -16,7 +16,7 @@ it('creates a splash stage from content', function () {
 });
 
 it('supports legacy splash key', function () {
-    $stage = (new SplashStageDriver())->make([
+    $stage = (new SplashStageDriver)->make([
         'splash' => 'Legacy splash.',
     ]);
 
@@ -25,14 +25,14 @@ it('supports legacy splash key', function () {
 });
 
 it('creates a disabled splash stage when no content exists', function () {
-    $stage = (new SplashStageDriver())->make();
+    $stage = (new SplashStageDriver)->make();
 
     expect($stage->enabled)->toBeFalse()
         ->and($stage->payload['content'])->toBeNull();
 });
 
 it('defaults splash presentation to inline', function () {
-    $stage = (new SplashStageDriver())->make([
+    $stage = (new SplashStageDriver)->make([
         'content' => 'Welcome!',
     ]);
 
@@ -40,7 +40,7 @@ it('defaults splash presentation to inline', function () {
 });
 
 it('supports configured splash presentation', function () {
-    $stage = (new SplashStageDriver())->make([
+    $stage = (new SplashStageDriver)->make([
         'content' => 'Welcome!',
         'presentation' => 'fullscreen',
     ]);
@@ -49,7 +49,7 @@ it('supports configured splash presentation', function () {
 });
 
 it('preserves splash metadata', function () {
-    $driver = new \LBHurtado\XRider\StageDrivers\SplashStageDriver();
+    $driver = new SplashStageDriver;
 
     $stage = $driver->make([
         'content' => '<strong>Hello</strong>',

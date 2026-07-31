@@ -8,12 +8,12 @@ function inferTestPhase(RiderStageData $stage): string
     $payload = $stage->payload;
 
     if (isset($payload['phase']) && in_array($payload['phase'], [
-            'pre_claim',
-            'runtime',
-            'success',
-            'redirect',
-            'post_claim',
-        ], true)) {
+        'pre_claim',
+        'runtime',
+        'success',
+        'redirect',
+        'post_claim',
+    ], true)) {
         return $payload['phase'];
     }
 

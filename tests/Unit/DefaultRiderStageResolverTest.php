@@ -9,12 +9,12 @@ use LBHurtado\XRider\Support\RiderStageDriverRegistry;
 
 function xRiderStageResolver(): DefaultRiderStageResolver
 {
-    $registry = new RiderStageDriverRegistry();
+    $registry = new RiderStageDriverRegistry;
 
     $registry
-        ->register(new MessageStageDriver())
-        ->register(new RedirectStageDriver())
-        ->register(new SplashStageDriver());
+        ->register(new MessageStageDriver)
+        ->register(new RedirectStageDriver)
+        ->register(new SplashStageDriver);
 
     return new DefaultRiderStageResolver($registry);
 }
@@ -95,7 +95,7 @@ it('resolves through the container binding', function () {
 });
 
 it('resolves legacy rider splash as fullscreen pre claim stage with metadata', function () {
-    $resolver = app(\LBHurtado\XRider\Contracts\RiderStageResolverContract::class);
+    $resolver = app(RiderStageResolverContract::class);
 
     $collection = $resolver->resolve([
         'splash' => '<strong>Hello</strong>',
