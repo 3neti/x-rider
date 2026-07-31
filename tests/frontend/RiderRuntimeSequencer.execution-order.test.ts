@@ -60,12 +60,12 @@ describe('RiderRuntimeSequencer execution order', () => {
             },
         });
 
-        await new Promise((resolve) => window.setTimeout(resolve, 5));
-
-        expect(events).toEqual([
-            'mount-event',
-            'complete-event',
-        ]);
+        await vi.waitFor(() => {
+            expect(events).toEqual([
+                'mount-event',
+                'complete-event',
+            ]);
+        });
     });
 
     it('executes stages sequentially', async () => {
@@ -122,12 +122,12 @@ describe('RiderRuntimeSequencer execution order', () => {
             },
         });
 
-        await new Promise((resolve) => window.setTimeout(resolve, 5));
-
-        expect(events).toEqual([
-            'first-event',
-            'second-event',
-        ]);
+        await vi.waitFor(() => {
+            expect(events).toEqual([
+                'first-event',
+                'second-event',
+            ]);
+        });
     });
 
     it('does not execute disabled stage actions', async () => {
@@ -178,10 +178,10 @@ describe('RiderRuntimeSequencer execution order', () => {
             },
         });
 
-        await new Promise((resolve) => window.setTimeout(resolve, 5));
-
-        expect(events).toEqual([
-            'enabled-event',
-        ]);
+        await vi.waitFor(() => {
+            expect(events).toEqual([
+                'enabled-event',
+            ]);
+        });
     });
 });
