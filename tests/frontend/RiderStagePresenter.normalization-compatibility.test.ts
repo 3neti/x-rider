@@ -134,7 +134,7 @@ describe('RiderStagePresenter normalization compatibility', () => {
         expect(context.exists()).toBe(true);
         expect(context.text()).toContain('Pay Code');
         expect(context.text()).toContain('86QD');
-        expect(context.find('.text-6xl').exists()).toBe(true);
+        expect(context.find('span[style*="4.5rem"]').exists()).toBe(true);
     });
 
     it('uses a smaller context code treatment for long references', () => {
@@ -154,7 +154,7 @@ describe('RiderStagePresenter normalization compatibility', () => {
         const context = wrapper.find('[data-testid="rider-stage-context-code"]');
 
         expect(context.exists()).toBe(true);
-        expect(context.find('.text-2xl').exists()).toBe(true);
+        expect(context.find('span[style*="1.875rem"]').exists()).toBe(true);
         expect(context.classes()).not.toContain('text-muted-foreground');
     });
 });

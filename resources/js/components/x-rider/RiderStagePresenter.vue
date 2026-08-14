@@ -92,26 +92,30 @@ const contextCaption = computed(() =>
     String(props.stage.payload?.context_caption ?? '').trim()
 );
 
-const contextCodeSizeClass = computed(() => {
+const contextCodeDisplayStyle = computed(() => {
     const length = contextCode.value.length;
+    let fontSize = '4.5rem';
 
-    if (length <= 4) {
-        return 'text-6xl sm:text-7xl';
+    if (length > 4 && length <= 6) {
+        fontSize = '3.75rem';
     }
 
-    if (length <= 6) {
-        return 'text-5xl sm:text-6xl';
+    if (length > 6 && length <= 10) {
+        fontSize = '3rem';
     }
 
-    if (length <= 10) {
-        return 'text-4xl sm:text-5xl';
+    if (length > 10 && length <= 16) {
+        fontSize = '2.25rem';
     }
 
-    if (length <= 16) {
-        return 'text-3xl sm:text-4xl';
+    if (length > 16) {
+        fontSize = '1.875rem';
     }
 
-    return 'text-2xl sm:text-3xl';
+    return {
+        fontSize,
+        letterSpacing: '0.08em',
+    };
 });
 
 const remainingSeconds = ref(0);
@@ -238,10 +242,8 @@ async function handleCopyAction(): Promise<void> {
           <div class="flex w-full items-center gap-3 sm:gap-4">
             <span class="h-0.5 min-w-4 flex-1 rounded-full bg-foreground/80" />
             <span
-                :class="[
-                    contextCodeSizeClass,
-                    'min-w-0 max-w-full break-all font-mono font-black uppercase leading-none tracking-[0.08em] text-foreground',
-                ]"
+                :style="contextCodeDisplayStyle"
+                class="min-w-0 max-w-full break-all font-mono font-black uppercase leading-none text-foreground"
             >
               {{ contextCode }}
             </span>
