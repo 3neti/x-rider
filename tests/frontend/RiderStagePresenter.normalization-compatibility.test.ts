@@ -111,4 +111,50 @@ describe('RiderStagePresenter normalization compatibility', () => {
         expect(wrapper.exists()).toBe(true);
         expect(wrapper.text()).toBe('');
     });
+
+    it('renders optional context code prominently for fullscreen stages', () => {
+        const wrapper = mount(RiderStagePresenter, {
+            props: {
+                stage: {
+                    type: 'splash',
+                    key: 'payload-context-code',
+                    presentation: 'fullscreen',
+                    payload: {
+                        context_label: 'Pay Code',
+                        context_code: '86QD',
+                        content: 'Please review this before continuing.',
+                        content_type: 'markdown',
+                    },
+                },
+            },
+        });
+
+        const context = wrapper.find('[data-testid="rider-stage-context-code"]');
+
+        expect(context.exists()).toBe(true);
+        expect(context.text()).toContain('Pay Code');
+        expect(context.text()).toContain('86QD');
+        expect(context.find('.text-6xl').exists()).toBe(true);
+    });
+
+    it('uses a smaller context code treatment for long references', () => {
+        const wrapper = mount(RiderStagePresenter, {
+            props: {
+                stage: {
+                    type: 'splash',
+                    key: 'long-context-code',
+                    presentation: 'fullscreen',
+                    payload: {
+                        context_code: 'LONG-PAY-CODE-REFERENCE-2026',
+                    },
+                },
+            },
+        });
+
+        const context = wrapper.find('[data-testid="rider-stage-context-code"]');
+
+        expect(context.exists()).toBe(true);
+        expect(context.find('.text-2xl').exists()).toBe(true);
+        expect(context.classes()).not.toContain('text-muted-foreground');
+    });
 });

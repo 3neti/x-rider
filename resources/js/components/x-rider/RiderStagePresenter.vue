@@ -80,6 +80,40 @@ const hasStageContent = computed(() =>
     Boolean(stageContent.value.content)
 );
 
+const contextCode = computed(() =>
+    String(props.stage.payload?.context_code ?? '').trim()
+);
+
+const contextLabel = computed(() =>
+    String(props.stage.payload?.context_label ?? '').trim()
+);
+
+const contextCaption = computed(() =>
+    String(props.stage.payload?.context_caption ?? '').trim()
+);
+
+const contextCodeSizeClass = computed(() => {
+    const length = contextCode.value.length;
+
+    if (length <= 4) {
+        return 'text-6xl sm:text-7xl';
+    }
+
+    if (length <= 6) {
+        return 'text-5xl sm:text-6xl';
+    }
+
+    if (length <= 10) {
+        return 'text-4xl sm:text-5xl';
+    }
+
+    if (length <= 16) {
+        return 'text-3xl sm:text-4xl';
+    }
+
+    return 'text-2xl sm:text-3xl';
+});
+
 const remainingSeconds = ref(0);
 let countdownTimer: number | null = null;
 
@@ -185,10 +219,43 @@ async function handleCopyAction(): Promise<void> {
       <div
           :class="{
               'w-full max-w-md rounded-2xl bg-background p-5 shadow-xl': isModal,
-              'mx-auto w-full max-w-lg space-y-6 text-center': isFullscreen,
+              'mx-auto w-full max-w-3xl space-y-7 text-center': isFullscreen,
               'space-y-3': !isModal && !isFullscreen,
           }"
       >
+        <div
+            v-if="contextCode"
+            data-testid="rider-stage-context-code"
+            class="mx-auto w-full space-y-3 text-center"
+        >
+          <p
+              v-if="contextLabel"
+              class="text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-foreground/80"
+          >
+            {{ contextLabel }}
+          </p>
+
+          <div class="flex w-full items-center gap-3 sm:gap-4">
+            <span class="h-0.5 min-w-4 flex-1 rounded-full bg-foreground/80" />
+            <span
+                :class="[
+                    contextCodeSizeClass,
+                    'min-w-0 max-w-full break-all font-mono font-black uppercase leading-none tracking-[0.08em] text-foreground',
+                ]"
+            >
+              {{ contextCode }}
+            </span>
+            <span class="h-0.5 min-w-4 flex-1 rounded-full bg-foreground/80" />
+          </div>
+
+          <p
+              v-if="contextCaption"
+              class="text-xs font-medium leading-relaxed text-foreground/75"
+          >
+            {{ contextCaption }}
+          </p>
+        </div>
+
         <RiderRenderer
             v-if="hasStageContent && !isRedirect"
             :content="stageContent"
