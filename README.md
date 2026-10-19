@@ -73,3 +73,5 @@ composer audit
 
 Hosted verification covers both supported PHP/Laravel lanes and the package-owned
 Vue runtime.
+
+Strict paid-instruction destination validation: [redirect guide](docs/REDIRECTS.md).
