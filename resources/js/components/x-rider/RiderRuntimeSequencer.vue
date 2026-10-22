@@ -295,7 +295,8 @@ function advanceBlockingStage(): void {
   <Teleport to="body">
   <div
       v-if="activeBlockingStage && isModal"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-background/80 px-4 backdrop-blur-sm"
+      class="fixed inset-0 flex items-center justify-center bg-background/80 px-4 backdrop-blur-sm"
+      style="z-index: 60"
       role="dialog"
       aria-modal="true"
       :aria-label="String(activeBlockingStage.payload?.aria_label ?? activeBlockingStage.payload?.label ?? activeBlockingStage.key ?? 'Rider experience')"
@@ -321,7 +322,8 @@ function advanceBlockingStage(): void {
 
   <section
       v-else-if="activeBlockingStage && isFullscreen"
-      class="fixed inset-0 z-[60] flex h-[100svh] flex-col overflow-y-auto bg-background px-4 pt-6 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-6"
+      class="fixed inset-0 flex h-[100svh] flex-col overflow-y-auto bg-background px-4 pt-6 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-6"
+      style="z-index: 60"
       role="dialog"
       aria-modal="true"
       :aria-label="String(activeBlockingStage.payload?.aria_label ?? activeBlockingStage.payload?.label ?? activeBlockingStage.key ?? 'Rider experience')"

@@ -36,6 +36,7 @@ describe('blocking rider actions', () => {
 
             const dialog = document.body.querySelector('[role="dialog"]');
             expect(dialog?.parentElement).toBe(document.body);
+            expect((dialog as HTMLElement).style.zIndex).toBe('60');
             expect(document.body.querySelectorAll('[role="dialog"]')).toHaveLength(1);
             expect(dialog?.querySelectorAll('button')).toHaveLength(1);
             expect(dialog?.getAttribute('aria-label')).toBe('Rider introduction');
