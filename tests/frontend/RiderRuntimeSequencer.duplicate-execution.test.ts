@@ -4,12 +4,12 @@ import RiderRuntimeSequencer from '../../resources/js/components/x-rider/RiderRu
 
 vi.mock('../../resources/js/components/x-rider/RiderStagePresenter.vue', () => ({
     default: {
-        props: ['stage'],
+        props: { stage: Object, embedded: Boolean },
         emits: ['dismissed'],
         template: `
             <div data-test="stage">
                 <button
-                    v-if="stage.presentation === 'modal' || stage.presentation === 'fullscreen'"
+                    v-if="!embedded && (stage.presentation === 'modal' || stage.presentation === 'fullscreen')"
                     data-test="dismiss"
                     @click="$emit('dismissed')"
                 >

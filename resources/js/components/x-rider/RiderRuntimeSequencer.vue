@@ -297,12 +297,13 @@ function advanceBlockingStage(): void {
       class="fixed inset-0 z-50 flex items-center justify-center bg-background/80 px-4 backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
+      :aria-label="String(activeBlockingStage.payload?.aria_label ?? activeBlockingStage.payload?.label ?? activeBlockingStage.key ?? 'Rider experience')"
   >
     <div class="w-full max-w-lg rounded-2xl border bg-card p-5 shadow-xl">
       <div class="space-y-4">
         <RiderStagePresenter
             :stage="activeBlockingStage"
-            @dismissed="advanceBlockingStage"
+            embedded
         />
 
         <button
@@ -319,26 +320,26 @@ function advanceBlockingStage(): void {
 
   <section
       v-else-if="activeBlockingStage && isFullscreen"
-      class="fixed inset-0 z-[60] flex min-h-screen items-center justify-center bg-background px-6 py-10"
+      class="fixed inset-0 z-[60] flex h-[100svh] flex-col overflow-y-auto bg-background px-4 pt-6 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-6"
       role="dialog"
       aria-modal="true"
+      :aria-label="String(activeBlockingStage.payload?.aria_label ?? activeBlockingStage.payload?.label ?? activeBlockingStage.key ?? 'Rider experience')"
   >
-    <div class="mx-auto flex h-full w-full max-w-2xl flex-col justify-center">
-      <div class="space-y-8 text-center">
+    <div class="mx-auto flex min-h-full w-full max-w-2xl flex-1 flex-col">
+      <div class="flex flex-1 flex-col justify-center py-4 text-center">
         <RiderStagePresenter
             :stage="activeBlockingStage"
-            @dismissed="advanceBlockingStage"
+            embedded
         />
-
-        <button
-            type="button"
-            data-test="dismiss"
-            class="inline-flex w-full items-center justify-center rounded-full bg-primary px-4 py-3 text-sm font-medium text-primary-foreground transition hover:bg-primary/90 sm:w-auto sm:px-8"
-            @click="advanceBlockingStage"
-        >
-          {{ continueLabel }}
-        </button>
       </div>
+      <button
+          type="button"
+          data-test="dismiss"
+          class="mt-4 inline-flex w-full shrink-0 items-center justify-center rounded-full bg-primary px-4 py-3 text-sm font-medium text-primary-foreground transition hover:bg-primary/90"
+          @click="advanceBlockingStage"
+      >
+        {{ continueLabel }}
+      </button>
     </div>
   </section>
 </template>

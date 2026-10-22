@@ -72,10 +72,11 @@ function dismiss(): void {
         class="fixed inset-0 z-50 flex items-center justify-center bg-background/80 px-4 backdrop-blur-sm"
         role="dialog"
         aria-modal="true"
+        :aria-label="String(activeStage?.payload?.aria_label ?? activeStage?.payload?.label ?? activeStage?.key ?? 'Rider experience')"
     >
       <div class="w-full max-w-md rounded-2xl border bg-card p-5 shadow-lg">
         <div class="space-y-5">
-          <RiderStagePresenter :stage="activeStage" force />
+          <RiderStagePresenter :stage="activeStage" embedded />
 
           <button
               type="button"

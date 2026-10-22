@@ -9,6 +9,10 @@ const props = defineProps({
     type: Object as () => RawRiderStage,
     required: true,
   },
+  embedded: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const emit = defineEmits(['dismissed']);
@@ -212,19 +216,19 @@ async function handleCopyAction(): Promise<void> {
 <template>
   <template v-if="!dismissed">
     <div
-        :role="isBlockingPresentation ? 'dialog' : undefined"
-        :aria-modal="isBlockingPresentation ? 'true' : undefined"
-        :aria-label="isBlockingPresentation ? dialogLabel : undefined"
+        :role="isBlockingPresentation && !embedded ? 'dialog' : undefined"
+        :aria-modal="isBlockingPresentation && !embedded ? 'true' : undefined"
+        :aria-label="isBlockingPresentation && !embedded ? dialogLabel : undefined"
         :class="{
-            'fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4': isModal,
-            'fixed inset-0 z-50 flex items-center justify-center bg-background px-6': isFullscreen,
+            'fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4': isModal && !embedded,
+            'fixed inset-0 z-50 flex items-center justify-center bg-background px-6': isFullscreen && !embedded,
         }"
     >
       <div
           :class="{
-              'w-full max-w-md rounded-2xl bg-background p-5 shadow-xl': isModal,
-              'mx-auto w-full max-w-3xl space-y-7 text-center': isFullscreen,
-              'space-y-3': !isModal && !isFullscreen,
+              'w-full max-w-md rounded-2xl bg-background p-5 shadow-xl': isModal && !embedded,
+              'mx-auto w-full max-w-3xl space-y-7 text-center': isFullscreen && !embedded,
+              'space-y-3': embedded || (!isModal && !isFullscreen),
           }"
       >
         <div
@@ -339,7 +343,7 @@ async function handleCopyAction(): Promise<void> {
         </div>
 
         <button
-            v-if="isModal || isFullscreen"
+            v-if="isBlockingPresentation && !embedded"
             type="button"
             data-test="dismiss"
             class="w-full rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"

@@ -69,22 +69,23 @@ function dismiss(): void {
   <Teleport to="body">
     <section
         v-if="visible"
-        class="fixed inset-0 z-[60] flex min-h-screen items-center justify-center bg-background px-6 py-10"
+        class="fixed inset-0 z-[60] flex h-[100svh] flex-col overflow-y-auto bg-background px-4 pt-6 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-6"
         role="dialog"
         aria-modal="true"
+        :aria-label="String(activeStage?.payload?.aria_label ?? activeStage?.payload?.label ?? activeStage?.key ?? 'Rider experience')"
     >
-      <div class="mx-auto flex h-full w-full max-w-2xl flex-col justify-center">
-        <div class="space-y-8 text-center">
-          <RiderStagePresenter :stage="activeStage" force />
-
-          <button
-              type="button"
-              class="inline-flex w-full items-center justify-center rounded-full bg-primary px-4 py-3 text-sm font-medium text-primary-foreground transition hover:bg-primary/90 sm:w-auto sm:px-8"
-              @click="dismiss"
-          >
-            {{ dismissLabel }}
-          </button>
+      <div class="mx-auto flex min-h-full w-full max-w-2xl flex-1 flex-col">
+        <div class="flex flex-1 flex-col justify-center py-4 text-center">
+          <RiderStagePresenter :stage="activeStage" embedded />
         </div>
+
+        <button
+            type="button"
+            class="mt-4 inline-flex w-full shrink-0 items-center justify-center rounded-full bg-primary px-4 py-3 text-sm font-medium text-primary-foreground transition hover:bg-primary/90"
+            @click="dismiss"
+        >
+          {{ dismissLabel }}
+        </button>
       </div>
     </section>
   </Teleport>
