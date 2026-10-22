@@ -322,8 +322,8 @@ function advanceBlockingStage(): void {
 
   <section
       v-else-if="activeBlockingStage && isFullscreen"
-      class="fixed inset-0 flex h-[100svh] flex-col overflow-y-auto bg-background px-4 pt-6 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-6"
-      style="z-index: 60"
+      class="fixed inset-0 flex h-[100svh] flex-col overflow-y-auto bg-background px-4 pt-6 sm:px-6"
+      style="z-index: 60; padding-bottom: max(0.2in, calc(env(safe-area-inset-bottom) + 1rem))"
       role="dialog"
       aria-modal="true"
       :aria-label="String(activeBlockingStage.payload?.aria_label ?? activeBlockingStage.payload?.label ?? activeBlockingStage.key ?? 'Rider experience')"
@@ -338,7 +338,7 @@ function advanceBlockingStage(): void {
       <button
           type="button"
           data-test="dismiss"
-          class="mt-4 inline-flex w-full shrink-0 items-center justify-center rounded-full bg-primary px-4 py-3 text-sm font-medium text-primary-foreground transition hover:bg-primary/90"
+          class="mx-auto mt-4 inline-flex h-11 w-full max-w-lg shrink-0 items-center justify-center rounded-full bg-primary px-4 text-sm font-medium text-primary-foreground shadow-lg shadow-foreground/10 transition hover:bg-primary/90"
           @click="advanceBlockingStage"
       >
         {{ continueLabel }}
