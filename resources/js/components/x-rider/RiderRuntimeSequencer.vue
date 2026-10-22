@@ -292,6 +292,7 @@ function advanceBlockingStage(): void {
     />
   </div>
 
+  <Teleport to="body">
   <div
       v-if="activeBlockingStage && isModal"
       class="fixed inset-0 z-50 flex items-center justify-center bg-background/80 px-4 backdrop-blur-sm"
@@ -342,4 +343,5 @@ function advanceBlockingStage(): void {
       </button>
     </div>
   </section>
+  </Teleport>
 </template>

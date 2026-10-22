@@ -26,6 +26,7 @@ describe('RiderRuntimeSequencer duplicate execution protection', () => {
         const track = vi.fn();
 
         const wrapper = mount(RiderRuntimeSequencer, {
+            attachTo: document.body,
             props: {
                 stages: [
                     {
@@ -103,20 +104,20 @@ describe('RiderRuntimeSequencer duplicate execution protection', () => {
 
         await wrapper.vm.$nextTick();
 
-        expect(wrapper.text()).toContain('modal-stage');
-        expect(wrapper.text()).not.toContain('fullscreen-stage');
+        expect(document.body.textContent).toContain('modal-stage');
+        expect(document.body.textContent).not.toContain('fullscreen-stage');
 
-        await wrapper.find('[data-test="dismiss"]').trigger('click');
+        (document.body.querySelector('[data-test="dismiss"]') as HTMLButtonElement).click();
         await wrapper.vm.$nextTick();
 
-        expect(wrapper.text()).not.toContain('modal-stage');
-        expect(wrapper.text()).toContain('fullscreen-stage');
+        expect(document.body.textContent).not.toContain('modal-stage');
+        expect(document.body.textContent).toContain('fullscreen-stage');
 
-        await wrapper.find('[data-test="dismiss"]').trigger('click');
+        (document.body.querySelector('[data-test="dismiss"]') as HTMLButtonElement).click();
         await wrapper.vm.$nextTick();
 
-        expect(wrapper.text()).not.toContain('modal-stage');
-        expect(wrapper.text()).not.toContain('fullscreen-stage');
+        expect(document.body.textContent).not.toContain('modal-stage');
+        expect(document.body.textContent).not.toContain('fullscreen-stage');
     });
 
     it('does not reopen dismissed blocking stages after rerender', async () => {
@@ -131,21 +132,22 @@ describe('RiderRuntimeSequencer duplicate execution protection', () => {
         ];
 
         const wrapper = mount(RiderRuntimeSequencer, {
+            attachTo: document.body,
             props: { stages },
         });
 
         await wrapper.vm.$nextTick();
 
-        expect(wrapper.text()).toContain('modal-stage');
+        expect(document.body.textContent).toContain('modal-stage');
 
-        await wrapper.find('[data-test="dismiss"]').trigger('click');
+        (document.body.querySelector('[data-test="dismiss"]') as HTMLButtonElement).click();
         await wrapper.vm.$nextTick();
 
-        expect(wrapper.text()).not.toContain('modal-stage');
+        expect(document.body.textContent).not.toContain('modal-stage');
 
         await wrapper.setProps({ stages: [...stages] });
         await wrapper.vm.$nextTick();
 
-        expect(wrapper.text()).not.toContain('modal-stage');
+        expect(document.body.textContent).not.toContain('modal-stage');
     });
 });

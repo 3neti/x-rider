@@ -29,19 +29,23 @@ describe('blocking rider actions', () => {
         'renders one %s sequencer dialog and one Continue action',
         async (presentation) => {
             const wrapper = mount(RiderRuntimeSequencer, {
+                attachTo: document.body,
                 props: { stages: [splash(presentation)] },
             });
             mounted.push(wrapper);
 
-            expect(wrapper.findAll('[role="dialog"]')).toHaveLength(1);
-            expect(wrapper.findAll('button')).toHaveLength(1);
-            expect(wrapper.get('[role="dialog"]').attributes('aria-label')).toBe('Rider introduction');
+            const dialog = document.body.querySelector('[role="dialog"]');
+            expect(dialog?.parentElement).toBe(document.body);
+            expect(document.body.querySelectorAll('[role="dialog"]')).toHaveLength(1);
+            expect(dialog?.querySelectorAll('button')).toHaveLength(1);
+            expect(dialog?.getAttribute('aria-label')).toBe('Rider introduction');
 
-            await wrapper.get('button').trigger('click');
+            (dialog?.querySelector('button') as HTMLButtonElement).click();
+            await wrapper.vm.$nextTick();
 
-            expect(wrapper.findAll('[role="dialog"]')).toHaveLength(0);
+            expect(document.body.querySelectorAll('[role="dialog"]')).toHaveLength(0);
             await wrapper.setProps({ stages: [splash(presentation)] });
-            expect(wrapper.findAll('[role="dialog"]')).toHaveLength(0);
+            expect(document.body.querySelectorAll('[role="dialog"]')).toHaveLength(0);
         },
     );
 
