@@ -1,13 +1,20 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import type { RiderContent } from './types';
+
+type RenderableRiderContent = {
+  enabled?: boolean | null;
+  type?: string | null;
+  content?: unknown;
+  meta?: Record<string, unknown>;
+};
 
 const props = defineProps<{
-  content?: RiderContent | null;
+  content?: RenderableRiderContent | null;
 }>();
 
+const text = computed(() => typeof props.content?.content === 'string' ? props.content.content : '');
 const enabled = computed(() =>
-    props.content?.enabled !== false && !!props.content?.content
+    props.content?.enabled !== false && text.value !== ''
 );
 
 const type = computed(() => props.content?.type ?? 'markdown');
@@ -28,14 +35,14 @@ const canRenderHtml = computed(() =>
   >
     <div
         v-if="canRenderHtml"
-        v-html="content?.content"
+        v-html="text"
     />
 
     <p
         v-else
         class="whitespace-pre-line"
     >
-      {{ content?.content }}
+      {{ text }}
     </p>
   </article>
 </template>
