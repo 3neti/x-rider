@@ -76,7 +76,7 @@ function dismiss(): void {
     >
       <div class="w-full max-w-md rounded-2xl border bg-card p-5 shadow-lg">
         <div class="space-y-5">
-          <RiderStagePresenter :stage="activeStage" embedded />
+          <RiderStagePresenter v-if="activeStage" :stage="activeStage" embedded />
 
           <button
               type="button"
