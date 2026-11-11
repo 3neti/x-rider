@@ -76,7 +76,7 @@ function dismiss(): void {
     >
       <div class="mx-auto flex min-h-full w-full max-w-2xl flex-1 flex-col">
         <div class="flex flex-1 flex-col justify-center py-4 text-center">
-          <RiderStagePresenter :stage="activeStage" embedded />
+          <RiderStagePresenter v-if="activeStage" :stage="activeStage" embedded />
         </div>
 
         <button
