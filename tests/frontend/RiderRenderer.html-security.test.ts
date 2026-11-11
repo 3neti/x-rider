@@ -4,6 +4,20 @@ import RiderRenderer from '../../resources/js/components/x-rider/RiderRenderer.v
 import RiderStagePresenter from "../../resources/js/components/x-rider/RiderStagePresenter.vue";
 
 describe('RiderRenderer HTML security', () => {
+    it('renders a message when optional flags are absent', () => {
+        const wrapper = mount(RiderRenderer, { props: { content: { content: 'Thank you' } } });
+
+        expect(wrapper.text()).toContain('Thank you');
+    });
+
+    it('does not render non-text content as trusted HTML', () => {
+        const wrapper = mount(RiderRenderer, {
+            props: { content: { type: 'html', content: { unsafe: true }, meta: { trusted_html: true } } },
+        });
+
+        expect(wrapper.text()).toBe('');
+        expect(wrapper.find('article').exists()).toBe(false);
+    });
     it('renders markdown/plain content as escaped text', () => {
         const wrapper = mount(RiderRenderer, {
             props: {
